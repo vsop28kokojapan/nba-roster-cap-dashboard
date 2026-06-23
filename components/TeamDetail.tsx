@@ -13,7 +13,7 @@ function sortValue(p: Player, key: SortKey): string | number {
   if (key === 'jersey') return Number(String(p.jersey).replace(/\D/g, '')) || 0;
   if (key === 'name' || key === 'position') return String(p[key] ?? '');
   if (key === 'tradeRestricted') return p.tradeRestricted ? 1 : 0;
-  return Number((p as Record<string, unknown>)[key] ?? -1);
+  return Number((p as unknown as Record<string, unknown>)[key] ?? -1);
 }
 
 const LINE_LABELS: [string, keyof Thresholds][] = [
@@ -47,7 +47,7 @@ export default function TeamDetail({ team: t, players, data }: Props) {
   const roster = [...players].sort((a, b) => {
     const isMissing = (p: Player) =>
       (sort.key === 'salary' || sort.key === 'yearsRemaining') &&
-      (p as Record<string, unknown>)[sort.key] == null;
+      (p as unknown as Record<string, unknown>)[sort.key] == null;
     if (isMissing(a) !== isMissing(b)) return isMissing(a) ? 1 : -1;
     const av = sortValue(a, sort.key);
     const bv = sortValue(b, sort.key);
