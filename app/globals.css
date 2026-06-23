@@ -24,7 +24,7 @@ header {
   color: white;
   padding: 28px max(28px, calc((100vw - 1400px) / 2));
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
   border-bottom: 5px solid #e22036;
@@ -172,7 +172,7 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
 .section-heading {
   display: flex;
   justify-content: space-between;
-  align-items: end;
+  align-items: flex-end;
   gap: 24px;
   margin-bottom: 16px;
 }
@@ -370,7 +370,7 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
 .line-list span { font-size: 11px; font-weight: 800; }
 .line-list span small { display: block; font-weight: 500; color: #728294; margin-top: 3px; }
 .line-list b { font-size: 11px; text-align: right; }
-.detail-roster-title { display: flex; align-items: end; justify-content: space-between; }
+.detail-roster-title { display: flex; align-items: flex-end; justify-content: space-between; }
 .detail-roster-title span { font-size: 11px; color: #6c7d8f; margin-bottom: 10px; }
 
 /* ── sortable table ── */
