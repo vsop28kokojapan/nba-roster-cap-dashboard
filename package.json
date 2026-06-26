@@ -2,21 +2,14 @@
   "name": "nba-roster-cap-dashboard",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "update": "node scripts/update.mjs"
+    "update": "node src/update.mjs",
+    "start": "node src/server.mjs",
+    "dev": "node src/server.mjs"
   },
   "dependencies": {
-    "next": "^14.2.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "typescript": "^5"
+    "@supabase/supabase-js": "^2.108.2",
+    "dotenv": "^17.4.2"
   }
 }

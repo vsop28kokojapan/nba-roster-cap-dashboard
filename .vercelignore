@@ -1,0 +1,12 @@
+.env
+node_modules
+update.mjs
+server.mjs
+supabase.mjs
+supabase/
+data/
+download
+start.cmd
+start.ps1
+install-daily-update.ps1
+deploy-pages.yml

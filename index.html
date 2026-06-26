@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NBA Roster & Cap Board</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="enhancements.css">
+  <link rel="stylesheet" href="detail.css">
+  <link rel="stylesheet" href="team-page.css">
+  <link rel="stylesheet" href="link-fixes.css">
+</head>
+<body>
+  <header>
+    <div><p class="eyebrow">NBA OPERATIONS DESK</p><h1>Roster & Cap Board</h1><p id="meta">読み込み中…</p></div>
+    <button id="refresh">↻ データを更新</button>
+  </header>
+  <main id="mainApp">
+    <section class="thresholds" id="thresholds"></section>
+    <section class="rule-guide" aria-labelledby="ruleTitle">
+      <div class="section-heading"><div><p class="eyebrow dark">CAP RULES 101</p><h2 id="ruleTitle">4つのラインを、やさしく理解</h2></div><p>右へ行くほど支出が増え、チーム編成の自由度が下がります。</p></div>
+      <div class="rule-grid">
+        <article class="rule cap"><span>1</span><h3>サラリーキャップ</h3><strong class="rule-amount" data-threshold="salaryCap">—</strong><p><b>基本の予算ライン。</b>ただしNBAは「ソフトキャップ」なので、バード例外などを使えば超えることができます。</p><small>超えただけでは罰金なし</small></article>
+        <article class="rule tax"><span>2</span><h3>ラグジュアリータックス</h3><strong class="rule-amount" data-threshold="luxuryTax">—</strong><p><b>ぜいたく税の課税ライン。</b>超過額に応じてリーグへ税金を支払います。常連チームにはより重い税率があります。</p><small>主な影響：オーナーの支出増</small></article>
+        <article class="rule first"><span>3</span><h3>第1エプロン</h3><strong class="rule-amount" data-threshold="firstApron">—</strong><p><b>補強方法に制限が始まるライン。</b>サイン＆トレードでの獲得や、一部例外・トレードでの給与受取額が制限されます。</p><small>主な影響：補強の選択肢が減る</small></article>
+        <article class="rule second"><span>4</span><h3>第2エプロン</h3><strong class="rule-amount" data-threshold="secondApron">—</strong><p><b>最も厳しい制限ライン。</b>複数選手の給与合算、現金の放出、過去に作ったTPEの利用などが難しくなります。</p><small>主な影響：大型トレードが非常に困難</small></article>
+      </div>
+      <details class="rule-details"><summary>もう少し詳しく：なぜエプロンが重要？</summary><p>キャップ超過は珍しくありませんが、エプロン超過は「お金を払えば済む」だけではありません。特に第2エプロンを超えるとトレード手段やドラフト指名権にも制約が及ぶため、現在の戦力を保ちながら補強することが難しくなります。表示は主なルールの要約で、例外や適用時期があります。</p></details>
+    </section>
+    <nav class="tabs"><button class="active" data-tab="teams">チーム</button><button data-tab="players">選手</button><button data-tab="trades">トレード・異動</button></nav>
+    <section class="toolbar">
+      <input id="search" type="search" placeholder="チーム・選手・背番号を検索">
+      <select id="teamFilter"><option value="">全チーム</option></select>
+      <select id="statusFilter"><option value="">全ステータス</option><option>第2エプロン超</option><option>第1エプロン超</option><option>ラグジュアリータックス超</option><option>サラリーキャップ超</option><option>キャップ内</option></select>
+      <button id="csv">CSVを書き出す</button>
+    </section>
+    <section id="teams" class="panel active"><section class="cap-comparison"><div class="section-heading compact"><div><p class="eyebrow dark">LEAGUE COMPARISON</p><h2>30チーム キャップ比較</h2></div><p>棒の右端がチーム総額。縦線が各基準です。</p></div><div class="chart-legend"><span class="lg-cap">キャップ</span><span class="lg-tax">税ライン</span><span class="lg-first">第1</span><span class="lg-second">第2</span></div><div id="capChart" class="cap-chart"></div></section><div class="team-grid" id="teamGrid"></div></section>
+    <section id="players" class="panel"><div class="table-wrap"><table><thead><tr><th>チーム</th><th>背番号</th><th>選手</th><th>POS</th><th>サラリー</th><th>残年数</th><th>トレード制限</th></tr></thead><tbody id="playerRows"></tbody></table></div></section>
+    <section id="trades" class="panel"><div class="trade-list" id="tradeList"></div></section>
+    <p class="footnote" id="notes"></p>
+  </main>
+  <section id="teamPage" class="team-page" hidden><div id="teamDetail"></div></section>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

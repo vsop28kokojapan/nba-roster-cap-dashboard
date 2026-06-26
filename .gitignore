@@ -1,3 +1,6 @@
+.vercel
+.env
 node_modules/
 .next/
-.env*
+data/
+nba-data.json
