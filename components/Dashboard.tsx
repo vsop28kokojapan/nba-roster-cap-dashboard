@@ -1,12 +1,43 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { NBAData, Player, Team, Transaction } from '@/lib/types';
+import type { NBAData, Player, Team, Transaction } from '@/lib/types';
 import { yen, million, fmtDate, badgeClass, distanceText, lineDifference, capScale } from '@/lib/utils';
 import CapTrack from './CapTrack';
+import ThresholdCards from './ThresholdCards';
+import RuleGuide from './RuleGuide';
 
 type Tab = 'teams' | 'players' | 'trades';
+
+const SB_URL = 'https://wbojovciyyhkxewjfllz.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indib2pvdmNpeXloa3hld2pmbGx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMDc0NzQsImV4cCI6MjA5Nzc4MzQ3NH0.kfjq4Ww3NKppkbU9GQcKXPAPO2FNnz_BkZseiGhKHDc';
+
+async function sbGet(path: string) {
+  const r = await fetch(`${SB_URL}${path}`, {
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
+  });
+  if (!r.ok) throw new Error(`Supabase ${r.status}`);
+  return r.json();
+}
+
+async function fetchUpdatedAt(): Promise<string | null> {
+  try {
+    const rows = await sbGet('/rest/v1/nba_data?select=updated_at&id=eq.1');
+    return rows[0]?.updated_at ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchLatestData(): Promise<NBAData | null> {
+  try {
+    const rows = await sbGet('/rest/v1/nba_data?select=data&id=eq.1');
+    return rows[0]?.data ?? null;
+  } catch {
+    return null;
+  }
+}
 
 function Badge({ status }: { status: string }) {
   return <span className={`badge ${badgeClass(status)}`}>{status}</span>;
@@ -141,11 +172,54 @@ function TradeList({ transactions }: { transactions: Transaction[] }) {
   );
 }
 
-export default function Dashboard({ data }: { data: NBAData }) {
+export default function Dashboard({ initialData }: { initialData: NBAData | null }) {
+  const [data, setData] = useState<NBAData | null>(initialData);
   const [tab, setTab] = useState<Tab>('teams');
   const [search, setSearch] = useState('');
   const [teamFilter, setTeamFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  // 30-second polling: lightweight updatedAt check first, fetch full data only if changed
+  useEffect(() => {
+    if (!data) return;
+    const id = setInterval(async () => {
+      const ua = await fetchUpdatedAt();
+      if (!ua || ua === data.meta.updatedAt) return;
+      const next = await fetchLatestData();
+      if (next) setData(next);
+    }, 30_000);
+    return () => clearInterval(id);
+  }, [data?.meta?.updatedAt]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetch('/api/update', { method: 'POST' });
+      const next = await fetchLatestData();
+      if (next) setData(next);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
+  if (!data) {
+    return (
+      <>
+        <header>
+          <div>
+            <p className="eyebrow">NBA OPERATIONS DESK</p>
+            <h1>Roster &amp; Cap Board</h1>
+          </div>
+        </header>
+        <main>
+          <p style={{ padding: '48px', textAlign: 'center', color: '#5a6d80' }}>
+            データを読み込んでいます… Supabase に接続中。
+          </p>
+        </main>
+      </>
+    );
+  }
 
   const max = useMemo(() => capScale(data.teams, data.thresholds.secondApron), [data]);
   const q = search.trim().toLowerCase();
@@ -198,58 +272,81 @@ export default function Dashboard({ data }: { data: NBAData }) {
 
   return (
     <>
-      <nav className="tabs">
-        {(['teams', 'players', 'trades'] as Tab[]).map(t => (
-          <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
-            {t === 'teams' ? 'チーム' : t === 'players' ? '選手' : 'トレード・異動'}
-          </button>
-        ))}
-      </nav>
+      <header>
+        <div>
+          <p className="eyebrow">NBA OPERATIONS DESK</p>
+          <h1>Roster &amp; Cap Board</h1>
+          <p className="meta">
+            {data.meta.season} · 更新 {new Date(data.meta.updatedAt).toLocaleString('ja-JP')} · {data.players.length}選手
+          </p>
+        </div>
+        <button onClick={handleRefresh} disabled={refreshing} style={{ whiteSpace: 'nowrap' }}>
+          {refreshing ? '更新中…' : '↻ データを更新'}
+        </button>
+      </header>
 
-      <section className="toolbar">
-        <input
-          type="search"
-          placeholder="チーム・選手・背番号を検索"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <select value={teamFilter} onChange={e => setTeamFilter(e.target.value)}>
-          <option value="">全チーム</option>
-          {data.teams.map(t => (
-            <option key={t.abbreviation} value={t.abbreviation}>{t.abbreviation} · {t.name}</option>
+      <main>
+        <ThresholdCards thresholds={data.thresholds} />
+        <RuleGuide thresholds={data.thresholds} />
+
+        <nav className="tabs">
+          {(['teams', 'players', 'trades'] as Tab[]).map(t => (
+            <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
+              {t === 'teams' ? 'チーム' : t === 'players' ? '選手' : 'トレード・異動'}
+            </button>
           ))}
-        </select>
-        <select
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          style={{ display: tab === 'teams' ? '' : 'none' }}
-        >
-          <option value="">全ステータス</option>
-          <option>第2エプロン超</option>
-          <option>第1エプロン超</option>
-          <option>ラグジュアリータックス超</option>
-          <option>サラリーキャップ超</option>
-          <option>キャップ内</option>
-        </select>
-        <button onClick={handleCSV}>CSVを書き出す</button>
-      </section>
+        </nav>
 
-      {tab === 'teams' && (
-        <section className="panel active">
-          <CapChartSection teams={filteredTeams} data={data} max={max} />
-          <TeamGrid teams={filteredTeams} data={data} max={max} />
+        <section className="toolbar">
+          <input
+            type="search"
+            placeholder="チーム・選手・背番号を検索"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <select value={teamFilter} onChange={e => setTeamFilter(e.target.value)}>
+            <option value="">全チーム</option>
+            {data.teams.map(t => (
+              <option key={t.abbreviation} value={t.abbreviation}>{t.abbreviation} · {t.name}</option>
+            ))}
+          </select>
+          <select
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            style={{ display: tab === 'teams' ? '' : 'none' }}
+          >
+            <option value="">全ステータス</option>
+            <option>第2エプロン超</option>
+            <option>第1エプロン超</option>
+            <option>ラグジュアリータックス超</option>
+            <option>サラリーキャップ超</option>
+            <option>キャップ内</option>
+          </select>
+          <button onClick={handleCSV}>CSVを書き出す</button>
         </section>
-      )}
-      {tab === 'players' && (
-        <section className="panel active">
-          <PlayerTable players={filteredPlayers} />
-        </section>
-      )}
-      {tab === 'trades' && (
-        <section className="panel active">
-          <TradeList transactions={filteredTrades} />
-        </section>
-      )}
+
+        {tab === 'teams' && (
+          <section className="panel active">
+            <CapChartSection teams={filteredTeams} data={data} max={max} />
+            <TeamGrid teams={filteredTeams} data={data} max={max} />
+          </section>
+        )}
+        {tab === 'players' && (
+          <section className="panel active">
+            <PlayerTable players={filteredPlayers} />
+          </section>
+        )}
+        {tab === 'trades' && (
+          <section className="panel active">
+            <TradeList transactions={filteredTrades} />
+          </section>
+        )}
+
+        <p className="footnote">
+          {data.meta.notes.join(' ')}
+          {data.meta.warning ? ' ' + data.meta.warning : ''}
+        </p>
+      </main>
     </>
   );
 }

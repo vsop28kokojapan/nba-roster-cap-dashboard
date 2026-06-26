@@ -7,19 +7,18 @@ interface Props {
   params: { abbr: string };
 }
 
-export function generateStaticParams() {
-  const data = getNBAData();
-  return data.teams.map(t => ({ abbr: t.abbreviation }));
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  try {
+    const data = await getNBAData();
+    const team = data.teams.find(t => t.abbreviation === params.abbr.toUpperCase());
+    return { title: team ? `${team.name} | NBA Cap Board` : 'NBA Cap Board' };
+  } catch {
+    return { title: 'NBA Cap Board' };
+  }
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const data = getNBAData();
-  const team = data.teams.find(t => t.abbreviation === params.abbr.toUpperCase());
-  return { title: team ? `${team.name} | NBA Cap Board` : 'NBA Cap Board' };
-}
-
-export default function TeamPage({ params }: Props) {
-  const data = getNBAData();
+export default async function TeamPage({ params }: Props) {
+  const data = await getNBAData();
   const abbr = params.abbr.toUpperCase();
   const team = data.teams.find(t => t.abbreviation === abbr);
   if (!team) notFound();
