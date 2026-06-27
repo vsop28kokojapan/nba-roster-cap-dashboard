@@ -3,15 +3,22 @@ import type { NBAData, HistoricalSnapshot } from './types';
 
 const AUTH_OPT = { auth: { detectSessionInUrl: false, persistSession: false } };
 
+// JWTはすべて "eyJ" から始まる。環境変数に余分なラベルが混入していても正しい値を取り出す。
+function extractJwt(raw: string | undefined): string {
+  if (!raw) return '';
+  const m = raw.match(/eyJ[A-Za-z0-9_\-.]+/);
+  return m ? m[0] : raw.trim();
+}
+
 function readClient() {
-  const url = process.env.SUPABASE_URL!;
-  const key = process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_SERVICE_KEY!;
+  const url = (process.env.SUPABASE_URL ?? '').trim();
+  const key = extractJwt(process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_SERVICE_KEY);
   return createClient(url, key, AUTH_OPT);
 }
 
 function writeClient() {
-  const url = process.env.SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_KEY!;
+  const url = (process.env.SUPABASE_URL ?? '').trim();
+  const key = extractJwt(process.env.SUPABASE_SERVICE_KEY);
   return createClient(url, key, AUTH_OPT);
 }
 
