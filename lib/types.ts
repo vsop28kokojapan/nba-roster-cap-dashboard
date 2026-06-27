@@ -1,3 +1,5 @@
+export type ContractType = '2-way' | '10-day' | 'exhibit-10' | 'standard' | null;
+
 export interface Thresholds {
   salaryCap: number;
   luxuryTax: number;
@@ -38,6 +40,9 @@ export interface Player {
   tradeRestricted: boolean;
   headshot: string;
   profile: string;
+  contractType: ContractType;
+  yearsWithTeam: number | null;
+  teamJoinedSeason: string | null;
 }
 
 export interface Transaction {
@@ -62,4 +67,44 @@ export interface NBAData {
   teams: Team[];
   players: Player[];
   transactions: Transaction[];
+}
+
+// ── 履歴データ型 ──────────────────────────────────────────────
+
+export interface HistoricalTeam {
+  abbreviation: string;
+  name: string;
+  logo: string;
+  color: string;
+  playerCount: number;
+  rosterSalary: number;
+  totalCap: number | null;
+  activeCap: number | null;
+  deadCap: number | null;
+  capSpace: number | null;
+  apronStatus: string;
+  capSource: string;
+}
+
+export interface HistoricalPlayer {
+  id: string;
+  team: string;
+  name: string;
+  position: string;
+  salary: number | null;
+  yearsRemaining: number | null;
+  contractType: ContractType;
+}
+
+export interface HistoricalSnapshot {
+  season: string;
+  fetchedAt: string;
+  thresholds: {
+    salaryCap: number | null;
+    luxuryTax: number | null;
+    firstApron: number | null;
+    secondApron: number | null;
+  };
+  teams: HistoricalTeam[];
+  players: HistoricalPlayer[];
 }

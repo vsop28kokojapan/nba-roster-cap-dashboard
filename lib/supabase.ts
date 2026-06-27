@@ -1,17 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
-import type { NBAData } from './types';
+import type { NBAData, HistoricalSnapshot } from './types';
+
+const AUTH_OPT = { auth: { detectSessionInUrl: false, persistSession: false } };
 
 function readClient() {
   const url = process.env.SUPABASE_URL!;
   const key = process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_SERVICE_KEY!;
-  return createClient(url, key, { auth: { detectSessionInUrl: false, persistSession: false } });
+  return createClient(url, key, AUTH_OPT);
 }
 
 function writeClient() {
   const url = process.env.SUPABASE_URL!;
   const key = process.env.SUPABASE_SERVICE_KEY!;
-  return createClient(url, key, { auth: { detectSessionInUrl: false, persistSession: false } });
+  return createClient(url, key, AUTH_OPT);
 }
+
+// ── 現行データ ────────────────────────────────────────────────
 
 export async function getLatestData(): Promise<NBAData> {
   const { data, error } = await readClient()
@@ -31,4 +35,34 @@ export async function writeLatestData(nbaData: NBAData): Promise<void> {
     data: nbaData,
   });
   if (error) throw error;
+}
+
+// ── 履歴データ ────────────────────────────────────────────────
+
+export async function readHistory(season: string): Promise<HistoricalSnapshot> {
+  const { data, error } = await readClient()
+    .from('nba_history')
+    .select('data')
+    .eq('season', season)
+    .single();
+  if (error) throw error;
+  return data.data as HistoricalSnapshot;
+}
+
+export async function writeHistory(season: string, snapshot: HistoricalSnapshot): Promise<void> {
+  const { error } = await writeClient().from('nba_history').upsert({
+    season,
+    data: snapshot,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+}
+
+export async function listHistorySeasons(): Promise<string[]> {
+  const { data, error } = await readClient()
+    .from('nba_history')
+    .select('season')
+    .order('season', { ascending: false });
+  if (error) return [];
+  return (data ?? []).map((row: { season: string }) => row.season);
 }

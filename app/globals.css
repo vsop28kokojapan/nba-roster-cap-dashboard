@@ -427,3 +427,114 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
   .detail-roster-title { align-items: start; flex-direction: column; }
   .team-page { padding: 0 10px 30px; margin-top: 10px; }
 }
+
+/* ── contract badges ── */
+.contract-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  vertical-align: middle;
+}
+.cb-2way    { background: #d6e8ff; color: #1245a8; }
+.cb-10day   { background: #fff0d6; color: #8a4a00; }
+.cb-exhibit10 { background: #ebebeb; color: #485060; }
+
+/* ── tenure label ── */
+.tenure-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #355f84;
+}
+
+/* ── salary trend SVG ── */
+.salary-trend-svg {
+  display: block;
+  width: 100%;
+  max-width: 680px;
+  height: auto;
+}
+.no-history-msg { color: #7a8899; font-size: 13px; padding: 12px 0; }
+
+/* ── history panel ── */
+.history-panel { display: grid; gap: 20px; }
+
+.history-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.history-controls label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #4e6275;
+  margin-bottom: 5px;
+  letter-spacing: .05em;
+}
+.history-controls select {
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 8px;
+  padding: 9px 12px;
+  min-width: 180px;
+}
+.hist-loading { font-size: 13px; color: #4e6a83; }
+.hist-error   { font-size: 13px; color: #c0392b; }
+
+.history-chart-wrap {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+.hist-chart-note { font-size: 11px; color: #738294; margin: 4px 0 12px; }
+
+.hist-roster-wrap,
+.hist-all-teams {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+.hist-roster-wrap .eyebrow,
+.hist-all-teams .eyebrow,
+.history-chart-wrap .eyebrow { margin-bottom: 6px; }
+
+.hist-team-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.hist-team-cell img { object-fit: contain; }
+
+/* history-empty (no data yet) */
+.history-empty {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 28px;
+  max-width: 620px;
+}
+.history-empty h3 { margin: 8px 0 12px; }
+.history-empty p { color: #556070; font-size: 14px; line-height: 1.65; margin: 0 0 12px; }
+.history-empty pre {
+  background: #07182b;
+  color: #9ecdf0;
+  font-size: 12px;
+  padding: 14px 16px;
+  border-radius: 9px;
+  overflow-x: auto;
+  line-height: 1.7;
+  margin: 0 0 12px;
+}
+.history-empty code { background: #e9eff5; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+
+@media (max-width: 620px) {
+  .history-controls { flex-direction: column; align-items: stretch; }
+  .history-controls select { min-width: 0; width: 100%; }
+}

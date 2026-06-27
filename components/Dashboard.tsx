@@ -7,8 +7,10 @@ import { yen, million, fmtDate, badgeClass, distanceText, lineDifference, capSca
 import CapTrack from './CapTrack';
 import ThresholdCards from './ThresholdCards';
 import RuleGuide from './RuleGuide';
+import ContractBadge from './ContractBadge';
+import HistoryPanel from './HistoryPanel';
 
-type Tab = 'teams' | 'players' | 'trades';
+type Tab = 'teams' | 'players' | 'trades' | 'history';
 
 const SB_URL = 'https://wbojovciyyhkxewjfllz.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indib2pvdmNpeXloa3hld2pmbGx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMDc0NzQsImV4cCI6MjA5Nzc4MzQ3NH0.kfjq4Ww3NKppkbU9GQcKXPAPO2FNnz_BkZseiGhKHDc';
@@ -41,6 +43,12 @@ async function fetchLatestData(): Promise<NBAData | null> {
 
 function Badge({ status }: { status: string }) {
   return <span className={`badge ${badgeClass(status)}`}>{status}</span>;
+}
+
+function tenureLabel(years: number | null): string {
+  if (years == null) return '—';
+  if (years === 1) return '今季';
+  return `${years}年目`;
 }
 
 function CapChartSection({ teams, data, max }: { teams: Team[]; data: NBAData; max: number }) {
@@ -121,7 +129,7 @@ function PlayerTable({ players }: { players: Player[] }) {
         <thead>
           <tr>
             <th>チーム</th><th>背番号</th><th>選手</th><th>POS</th>
-            <th>サラリー</th><th>残年数</th><th>トレード制限</th>
+            <th>サラリー</th><th>残年数</th><th>契約タイプ</th><th>在籍年数</th><th>トレード制限</th>
           </tr>
         </thead>
         <tbody>
@@ -141,6 +149,12 @@ function PlayerTable({ players }: { players: Player[] }) {
               <td>{p.position}</td>
               <td><b>{yen(p.salary)}</b></td>
               <td>{p.yearsRemaining ?? '—'}</td>
+              <td>
+                <ContractBadge type={p.contractType} />
+              </td>
+              <td>
+                <span className="tenure-label">{tenureLabel(p.yearsWithTeam)}</span>
+              </td>
               <td>{p.tradeRestricted ? 'あり' : '—'}</td>
             </tr>
           ))}
@@ -178,9 +192,10 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
   const [search, setSearch] = useState('');
   const [teamFilter, setTeamFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [contractFilter, setContractFilter] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  // 30-second polling: lightweight updatedAt check first, fetch full data only if changed
+  // 30-second polling: lightweight updatedAt check first, full fetch only if changed
   useEffect(() => {
     if (!data) return;
     const id = setInterval(async () => {
@@ -232,8 +247,9 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
 
   const filteredPlayers = useMemo(() => data.players.filter(p =>
     (!teamFilter || p.team === teamFilter) &&
+    (!contractFilter || p.contractType === contractFilter) &&
     (!q || `${p.name} ${p.team} ${p.jersey}`.toLowerCase().includes(q))
-  ), [data.players, teamFilter, q]);
+  ), [data.players, teamFilter, contractFilter, q]);
 
   const filteredTrades = useMemo(() => data.transactions.filter(x =>
     (!teamFilter || x.team === teamFilter) &&
@@ -251,7 +267,11 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
     } else if (tab === 'players') {
       rows = filteredPlayers.map(p => ({
         Team: p.team, Player: p.name, Jersey: p.jersey, Position: p.position,
-        Salary: p.salary, YearsRemaining: p.yearsRemaining, TradeRestricted: p.tradeRestricted,
+        Salary: p.salary, YearsRemaining: p.yearsRemaining,
+        ContractType: p.contractType ?? 'standard',
+        YearsWithTeam: p.yearsWithTeam,
+        TeamJoinedSeason: p.teamJoinedSeason,
+        TradeRestricted: p.tradeRestricted,
       }));
     } else {
       rows = filteredTrades.map(x => ({
@@ -269,6 +289,8 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
     a.click();
     URL.revokeObjectURL(a.href);
   }
+
+  const showToolbar = tab !== 'history';
 
   return (
     <>
@@ -290,40 +312,52 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
         <RuleGuide thresholds={data.thresholds} />
 
         <nav className="tabs">
-          {(['teams', 'players', 'trades'] as Tab[]).map(t => (
+          {(['teams', 'players', 'trades', 'history'] as Tab[]).map(t => (
             <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
-              {t === 'teams' ? 'チーム' : t === 'players' ? '選手' : 'トレード・異動'}
+              {t === 'teams' ? 'チーム'
+                : t === 'players' ? '選手'
+                : t === 'trades' ? 'トレード・異動'
+                : '履歴'}
             </button>
           ))}
         </nav>
 
-        <section className="toolbar">
-          <input
-            type="search"
-            placeholder="チーム・選手・背番号を検索"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          <select value={teamFilter} onChange={e => setTeamFilter(e.target.value)}>
-            <option value="">全チーム</option>
-            {data.teams.map(t => (
-              <option key={t.abbreviation} value={t.abbreviation}>{t.abbreviation} · {t.name}</option>
-            ))}
-          </select>
-          <select
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            style={{ display: tab === 'teams' ? '' : 'none' }}
-          >
-            <option value="">全ステータス</option>
-            <option>第2エプロン超</option>
-            <option>第1エプロン超</option>
-            <option>ラグジュアリータックス超</option>
-            <option>サラリーキャップ超</option>
-            <option>キャップ内</option>
-          </select>
-          <button onClick={handleCSV}>CSVを書き出す</button>
-        </section>
+        {showToolbar && (
+          <section className="toolbar">
+            <input
+              type="search"
+              placeholder="チーム・選手・背番号を検索"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            <select value={teamFilter} onChange={e => setTeamFilter(e.target.value)}>
+              <option value="">全チーム</option>
+              {data.teams.map(t => (
+                <option key={t.abbreviation} value={t.abbreviation}>{t.abbreviation} · {t.name}</option>
+              ))}
+            </select>
+            {tab === 'teams' && (
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                <option value="">全ステータス</option>
+                <option>第2エプロン超</option>
+                <option>第1エプロン超</option>
+                <option>ラグジュアリータックス超</option>
+                <option>サラリーキャップ超</option>
+                <option>キャップ内</option>
+              </select>
+            )}
+            {tab === 'players' && (
+              <select value={contractFilter} onChange={e => setContractFilter(e.target.value)}>
+                <option value="">全契約タイプ</option>
+                <option value="2-way">2-WAY</option>
+                <option value="10-day">10日間</option>
+                <option value="exhibit-10">Exhibit 10</option>
+              </select>
+            )}
+            {tab === 'trades' && <span />}
+            <button onClick={handleCSV}>CSVを書き出す</button>
+          </section>
+        )}
 
         {tab === 'teams' && (
           <section className="panel active">
@@ -339,6 +373,11 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
         {tab === 'trades' && (
           <section className="panel active">
             <TradeList transactions={filteredTrades} />
+          </section>
+        )}
+        {tab === 'history' && (
+          <section className="panel active">
+            <HistoryPanel currentData={data} />
           </section>
         )}
 

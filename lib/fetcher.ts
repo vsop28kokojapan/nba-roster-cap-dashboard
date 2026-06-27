@@ -1,6 +1,19 @@
-import type { NBAData } from './types';
+import type { NBAData, ContractType, HistoricalSnapshot, HistoricalPlayer, HistoricalTeam } from './types';
 
 const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba';
+
+// 2-way contract fixed salaries by season start year (e.g. 2024 → 2024-25)
+const TWO_WAY_SALARIES: Record<number, number> = {
+  2025: 576152,
+  2024: 568422,
+  2023: 556688,
+  2022: 508891,
+  2021: 462629,
+  2020: 449115,
+  2019: 435093,
+  2018: 421632,
+  2017: 204349,
+};
 
 function clean(s = ''): string {
   return s
@@ -110,6 +123,77 @@ function apronStatus(
   return 'キャップ内';
 }
 
+function detectContractType(
+  espnType: unknown,
+  salary: number | null,
+  seasonStart: number
+): ContractType {
+  const ct = String(espnType ?? '').toLowerCase();
+  // ESPN API integer or string clues
+  if (ct === '3' || ct.includes('two') || ct.includes('2way') || ct.includes('twoway')) return '2-way';
+  if (ct === '4' || ct.includes('10day') || ct.includes('tenday')) return '10-day';
+  if (ct.includes('exhibit')) return 'exhibit-10';
+  // Salary-based 2-way detection (±$60K of the fixed 2-way salary for this season)
+  const twoWay = TWO_WAY_SALARIES[seasonStart];
+  if (salary != null && twoWay && Math.abs(salary - twoWay) < 60000) return '2-way';
+  return null;
+}
+
+function parseTxDate(dateStr: string): { year: number; month: number } | null {
+  if (!dateStr) return null;
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1 };
+  } catch { /* fall through */ }
+  if (/^\d{8}$/.test(dateStr)) {
+    return { year: parseInt(dateStr.slice(0, 4)), month: parseInt(dateStr.slice(4, 6)) };
+  }
+  return null;
+}
+
+type TxEntry = { date: string; team: string; description: string };
+
+function computeTenure(
+  players: Array<{ id: string; name: string; team: string }>,
+  transactions: TxEntry[],
+  currentSeasonStart: number
+): Map<string, { years: number; joinedSeason: string }> {
+  const result = new Map<string, { years: number; joinedSeason: string }>();
+  // oldest → newest
+  const sorted = [...transactions].sort((a, b) => a.date.localeCompare(b.date));
+
+  for (const player of players) {
+    const parts = player.name.split(' ');
+    const lastName = parts[parts.length - 1].toLowerCase();
+    if (!lastName || lastName.length < 2) continue;
+
+    // Find transactions where this player arrived at their current team
+    const arrivals = sorted.filter(tx => {
+      if (tx.team !== player.team) return false;
+      const desc = tx.description.toLowerCase();
+      if (!desc.includes(lastName)) return false;
+      // Must be an arrival event, not a departure
+      return /sign|acqui|draft/.test(desc) && !/waiv|releas/.test(desc);
+    });
+
+    if (arrivals.length === 0) continue;
+
+    // Most recent arrival = when they (re-)joined
+    const latest = arrivals[arrivals.length - 1];
+    const parsed = parseTxDate(latest.date);
+    if (!parsed) continue;
+
+    const { year, month } = parsed;
+    // Off-season (Jul-Sep): transaction belongs to the upcoming season
+    // In-season (Oct-Jun): transaction belongs to the current season (started prior Oct)
+    const joinSeasonStart = month >= 7 ? year : year - 1;
+    const years = Math.max(1, currentSeasonStart - joinSeasonStart + 1);
+    const joinedSeason = `${joinSeasonStart}-${String(joinSeasonStart + 1).slice(-2)}`;
+    result.set(player.id, { years, joinedSeason });
+  }
+  return result;
+}
+
 function translateTransaction(description = ''): string {
   const role = (s: string) =>
     s
@@ -174,6 +258,8 @@ function translateTransaction(description = ''): string {
     .replace(/cashとドラフト関連の権利/gi, '金銭およびドラフト関連の権利');
 }
 
+// ── 現行シーズンデータ取得 ─────────────────────────────────────
+
 export async function fetchNbaData(): Promise<NBAData> {
   const teamPayload = await get(`${ESPN}/teams?limit=100`);
   const teams = teamPayload.sports[0].leagues[0].teams
@@ -187,27 +273,35 @@ export async function fetchNbaData(): Promise<NBAData> {
   const rosters = await mapLimit(teams, 6, async (team: Record<string, unknown>) => {
     const abbr = (team.abbreviation as string).toLowerCase();
     const payload = await get(`${ESPN}/teams/${abbr}/roster`);
-    return (payload.athletes as Record<string, unknown>[]).map(a => ({
-      id: a.id as string,
-      team: team.abbreviation as string,
-      name: a.fullName as string,
-      jersey: (a.jersey as string) || '—',
-      position: ((a.position as Record<string, string> | undefined)?.abbreviation) || '—',
-      status: ((a.status as Record<string, string> | undefined)?.name) || '—',
-      age: (a.age as number | null) ?? null,
-      height: (a.displayHeight as string) || '',
-      weight: (a.displayWeight as string) || '',
-      salary: ((a.contract as Record<string, number | null> | undefined)?.salary) ?? null,
-      incomingTradeValue: ((a.contract as Record<string, number | null> | undefined)?.incomingTradeValue) ?? null,
-      outgoingTradeValue: ((a.contract as Record<string, number | null> | undefined)?.outgoingTradeValue) ?? null,
-      yearsRemaining: ((a.contract as Record<string, number | null> | undefined)?.yearsRemaining) ?? null,
-      tradeRestricted: Boolean((a.contract as Record<string, unknown> | undefined)?.tradeRestriction),
-      headshot: ((a.headshot as Record<string, string> | undefined)?.href) || '',
-      profile:
-        ((a.links as Array<{ rel?: string[]; href: string }> | undefined)
-          ?.find(l => l.rel?.includes('playercard') && l.rel?.includes('desktop'))
-          ?.href) || '',
-    }));
+    return (payload.athletes as Record<string, unknown>[]).map(a => {
+      const contract = a.contract as Record<string, unknown> | undefined;
+      const salary = (contract?.salary as number | null) ?? null;
+      const espnType = contract?.contractType ?? contract?.type ?? null;
+      return {
+        id: a.id as string,
+        team: team.abbreviation as string,
+        name: a.fullName as string,
+        jersey: (a.jersey as string) || '—',
+        position: ((a.position as Record<string, string> | undefined)?.abbreviation) || '—',
+        status: ((a.status as Record<string, string> | undefined)?.name) || '—',
+        age: (a.age as number | null) ?? null,
+        height: (a.displayHeight as string) || '',
+        weight: (a.displayWeight as string) || '',
+        salary,
+        incomingTradeValue: (contract?.incomingTradeValue as number | null) ?? null,
+        outgoingTradeValue: (contract?.outgoingTradeValue as number | null) ?? null,
+        yearsRemaining: (contract?.yearsRemaining as number | null) ?? null,
+        tradeRestricted: Boolean(contract?.tradeRestriction),
+        headshot: ((a.headshot as Record<string, string> | undefined)?.href) || '',
+        profile:
+          ((a.links as Array<{ rel?: string[]; href: string }> | undefined)
+            ?.find(l => l.rel?.includes('playercard') && l.rel?.includes('desktop'))
+            ?.href) || '',
+        contractType: detectContractType(espnType, salary, seasonStart),
+        yearsWithTeam: null as number | null,
+        teamJoinedSeason: null as string | null,
+      };
+    });
   });
 
   let capData: ReturnType<typeof extractSpotrac> = { caps: {}, thresholds: { salaryCap: null, luxuryTax: null, firstApron: null, secondApron: null } };
@@ -221,13 +315,37 @@ export async function fetchNbaData(): Promise<NBAData> {
   }
 
   const thresholds = {
-    salaryCap: capData.thresholds.salaryCap || ({ '2025-26': 154647000 } as Record<string, number>)[season] || null,
+    salaryCap: capData.thresholds.salaryCap || ({ 2025: 154647000 } as Record<number, number>)[seasonStart] || null,
     luxuryTax: capData.thresholds.luxuryTax || null,
     firstApron: capData.thresholds.firstApron || null,
     secondApron: capData.thresholds.secondApron || null,
   };
 
+  // Fetch current + past 4 seasons of transactions for tenure calculation (5 parallel calls)
+  const [currentTxPayload, ...pastTxArrays] = await Promise.all([
+    get(`${ESPN}/transactions?limit=200`),
+    ...[1, 2, 3, 4].map(offset =>
+      get(`${ESPN}/transactions?limit=200&season=${seasonStart - offset}`)
+        .then(d => (d.transactions || []) as Record<string, unknown>[])
+        .catch(() => [] as Record<string, unknown>[])
+    ),
+  ]);
+  const currentTxRaw = (currentTxPayload.transactions || []) as Record<string, unknown>[];
+
+  const allTxEntries: TxEntry[] = [...currentTxRaw, ...pastTxArrays.flat()].map(x => ({
+    date: String(x.date ?? ''),
+    team: (x.team as Record<string, string> | undefined)?.abbreviation ?? '',
+    description: String(x.description ?? ''),
+  }));
+
+  // Apply tenure to each player
   const players = rosters.flat();
+  const tenureMap = computeTenure(players, allTxEntries, seasonStart);
+  for (const p of players) {
+    const t = tenureMap.get(p.id);
+    if (t) { p.yearsWithTeam = t.years; p.teamJoinedSeason = t.joinedSeason; }
+  }
+
   const teamRows = teams.map((team: Record<string, unknown>) => {
     const abbr = team.abbreviation as string;
     const roster = players.filter(p => p.team === abbr);
@@ -252,8 +370,7 @@ export async function fetchNbaData(): Promise<NBAData> {
     };
   });
 
-  const txPayload = await get(`${ESPN}/transactions?limit=200`);
-  const transactions = ((txPayload.transactions || []) as Record<string, unknown>[]).map((x, i) => ({
+  const transactions = currentTxRaw.map((x, i) => ({
     id: `${x.date}-${(x.team as Record<string, string> | undefined)?.abbreviation || 'NBA'}-${i}`,
     date: x.date as string,
     team: (x.team as Record<string, string> | undefined)?.abbreviation || 'NBA',
@@ -282,5 +399,84 @@ export async function fetchNbaData(): Promise<NBAData> {
     teams: teamRows,
     players,
     transactions,
+  };
+}
+
+// ── 過去シーズンデータ取得 ─────────────────────────────────────
+
+export async function fetchHistoricalSeason(year: number): Promise<HistoricalSnapshot> {
+  const season = `${year}-${String(year + 1).slice(-2)}`;
+
+  const teamPayload = await get(`${ESPN}/teams?limit=100&season=${year}`);
+  const teams = teamPayload.sports[0].leagues[0].teams
+    .map((x: { team: unknown }) => x.team as Record<string, unknown>)
+    .filter((x: Record<string, unknown>) => x.isActive && !x.isAllStar);
+
+  const rosters = await mapLimit(teams, 6, async (team: Record<string, unknown>) => {
+    const abbr = (team.abbreviation as string).toLowerCase();
+    try {
+      const payload = await get(`${ESPN}/teams/${abbr}/roster?season=${year}`);
+      return (payload.athletes as Record<string, unknown>[]).map(a => {
+        const contract = a.contract as Record<string, unknown> | undefined;
+        const salary = (contract?.salary as number | null) ?? null;
+        return {
+          id: String(a.id),
+          team: team.abbreviation as string,
+          name: String(a.fullName ?? ''),
+          position: ((a.position as Record<string, string> | undefined)?.abbreviation) || '—',
+          salary,
+          yearsRemaining: (contract?.yearsRemaining as number | null) ?? null,
+          contractType: detectContractType(contract?.contractType ?? contract?.type, salary, year),
+        } as HistoricalPlayer;
+      });
+    } catch {
+      return [] as HistoricalPlayer[];
+    }
+  });
+
+  let capData: ReturnType<typeof extractSpotrac> = { caps: {}, thresholds: { salaryCap: null, luxuryTax: null, firstApron: null, secondApron: null } };
+  try {
+    capData = extractSpotrac(
+      await get(`https://www.spotrac.com/nba/cap/_/year/${year}`, 'text')
+    );
+  } catch { /* Spotrac historical might be unavailable */ }
+
+  const thresholdsHist = {
+    salaryCap: capData.thresholds.salaryCap || null,
+    luxuryTax: capData.thresholds.luxuryTax || null,
+    firstApron: capData.thresholds.firstApron || null,
+    secondApron: capData.thresholds.secondApron || null,
+  };
+
+  const players = rosters.flat();
+  const histTeams: HistoricalTeam[] = teams.map((team: Record<string, unknown>) => {
+    const abbr = team.abbreviation as string;
+    const roster = players.filter(p => p.team === abbr);
+    const reported = capData.caps[abbr];
+    const rosterSalary = roster.reduce((sum, p) => sum + (p.salary || 0), 0);
+    const total = reported?.totalCap || rosterSalary;
+    const logos = team.logos as Array<{ rel?: string[]; href: string }> | undefined;
+    return {
+      abbreviation: abbr,
+      name: team.displayName as string,
+      logo: logos?.find(l => l.rel?.includes('default'))?.href || '',
+      color: `#${(team.color as string) || '1d428a'}`,
+      playerCount: roster.length,
+      rosterSalary,
+      totalCap: reported?.totalCap || null,
+      activeCap: reported?.activeCap || null,
+      deadCap: reported?.deadCap || null,
+      capSpace: reported?.capSpace ?? null,
+      apronStatus: apronStatus(total, thresholdsHist),
+      capSource: reported ? 'Spotrac' : 'ESPNロスター合計（概算）',
+    };
+  });
+
+  return {
+    season,
+    fetchedAt: new Date().toISOString(),
+    thresholds: thresholdsHist,
+    teams: histTeams,
+    players,
   };
 }
