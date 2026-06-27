@@ -412,11 +412,28 @@ export async function fetchHistoricalSeason(year: number): Promise<HistoricalSna
     .map((x: { team: unknown }) => x.team as Record<string, unknown>)
     .filter((x: Record<string, unknown>) => x.isActive && !x.isAllStar);
 
+  // ESPNの過去シーズンAPIはstart-year / end-year の両方を試す
+  const espnYears = [year, year + 1];
+
   const rosters = await mapLimit(teams, 6, async (team: Record<string, unknown>) => {
     const abbr = (team.abbreviation as string).toLowerCase();
     try {
-      const payload = await get(`${ESPN}/teams/${abbr}/roster?season=${year}`);
-      return (payload.athletes as Record<string, unknown>[]).map(a => {
+      let athletes: Record<string, unknown>[] = [];
+      for (const ey of espnYears) {
+        const payload = await get(`${ESPN}/teams/${abbr}/roster?season=${ey}`).catch(() => ({}));
+        // direct array
+        if (Array.isArray(payload.athletes) && payload.athletes.length > 0) {
+          athletes = payload.athletes as Record<string, unknown>[];
+          break;
+        }
+        // nested under roster key
+        const nested = (payload.roster as Record<string, unknown> | undefined)?.athletes;
+        if (Array.isArray(nested) && nested.length > 0) {
+          athletes = nested as Record<string, unknown>[];
+          break;
+        }
+      }
+      return athletes.map(a => {
         const contract = a.contract as Record<string, unknown> | undefined;
         const salary = (contract?.salary as number | null) ?? null;
         return {
