@@ -651,3 +651,99 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
   .hist-modal-metrics { grid-template-columns: repeat(2, 1fr); }
   .hist-modal { padding: 18px; }
 }
+
+/* ── Player achievement badge ── */
+.player-badge {
+  display: inline-flex; align-items: center;
+  font-size: 13px; line-height: 1;
+  margin-left: 5px;
+  cursor: default;
+}
+
+/* ── Awards panel ── */
+.awards-panel { padding: 8px 0; }
+.awards-season-nav {
+  display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.awards-season-btn {
+  padding: 7px 18px; border-radius: 20px; font-size: 13px; font-weight: 600;
+  border: 2px solid #c8d6e2; background: white; color: #4a5f70; cursor: pointer;
+  transition: all .15s;
+}
+.awards-season-btn.active, .awards-season-btn:hover {
+  background: var(--blue); color: white; border-color: var(--blue);
+}
+
+.awards-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 40px;
+}
+@media (max-width: 820px) { .awards-grid { grid-template-columns: 1fr; } }
+
+.awards-col > .eyebrow { margin-bottom: 12px; }
+
+.award-cards { display: flex; flex-direction: column; gap: 10px; }
+.award-card {
+  display: flex; align-items: center; gap: 12px;
+  background: white; border: 1px solid #e0eaf2; border-radius: 12px;
+  padding: 13px 16px; box-shadow: 0 1px 3px #0000000a;
+  transition: box-shadow .15s;
+}
+.award-card:hover { box-shadow: 0 3px 12px #0000001a; }
+.award-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.award-label { font-size: 11px; color: #7a8fa0; margin: 0 0 2px; text-transform: uppercase; letter-spacing: .05em; }
+.award-name { font-size: 15px; font-weight: 700; color: var(--ink); margin: 0; }
+
+.award-teams { display: flex; flex-direction: column; gap: 12px; }
+.award-team-row {
+  background: white; border: 1px solid #e0eaf2; border-radius: 12px; padding: 12px 16px;
+}
+.award-team-label { display: block; font-size: 11px; color: #7a8fa0; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; font-weight: 700; }
+.award-team-members { display: flex; flex-wrap: wrap; gap: 6px; }
+.award-member {
+  background: #f0f5fb; border: 1px solid #d0dde8; border-radius: 6px;
+  padding: 3px 10px; font-size: 13px; font-weight: 500; color: var(--ink);
+}
+
+/* ── Standings ── */
+.standings-wrap { margin-top: 8px; }
+.standings-both {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+}
+@media (max-width: 760px) { .standings-both { grid-template-columns: 1fr; } }
+
+.standings-conf h4 {
+  font-size: 14px; font-weight: 700; color: var(--ink); margin: 0 0 10px;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.standings-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  background: white; border-radius: 10px; overflow: hidden;
+  border: 1px solid #e0eaf2; box-shadow: 0 1px 4px #0000000a;
+}
+.standings-table th {
+  background: #f0f5fb; padding: 8px 10px; text-align: left;
+  font-size: 11px; color: #7a8fa0; letter-spacing: .06em; text-transform: uppercase;
+  border-bottom: 1px solid #e0eaf2;
+}
+.standings-table td {
+  padding: 7px 10px; border-bottom: 1px solid #f0f5fb; vertical-align: middle;
+}
+.standings-table tr:last-child td { border-bottom: none; }
+.standings-table tr.playoff-in { background: #f0faf4; }
+.standings-table tr.playin td:first-child { border-left: 3px solid #e8aa21; }
+.standings-table .rank { color: #a0b0bf; font-size: 12px; text-align: center; width: 28px; }
+.standings-team { display: flex; align-items: center; gap: 7px; }
+.standings-name { color: #6e7f90; font-weight: 400; font-size: 11px; }
+
+.standings-legend {
+  margin-top: 18px; font-size: 12px; color: #7a8fa0;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.playoff-in-dot {
+  display: inline-block; width: 12px; height: 12px;
+  background: #d4f0e0; border: 1px solid #8fd4ad; border-radius: 3px;
+}
+.playin-dot {
+  display: inline-block; width: 4px; height: 12px;
+  background: #e8aa21; border-radius: 2px; margin-left: 8px;
+}

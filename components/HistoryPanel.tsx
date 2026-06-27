@@ -82,6 +82,7 @@ export default function HistoryPanel({ currentData }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [modalTeam, setModalTeam] = useState<HistoricalTeam | null>(null);
+  const [sort, setSort] = useState<{ key: string; dir: 'asc' | 'desc' }>({ key: 'totalCap', dir: 'desc' });
 
   useEffect(() => {
     fetch('/api/history')
@@ -138,9 +139,21 @@ export default function HistoryPanel({ currentData }: Props) {
     ? snapshot.players.filter(p => p.team === selectedTeam).sort((a, b) => (b.salary ?? 0) - (a.salary ?? 0))
     : [];
 
-  const histTeams = snapshot
-    ? [...snapshot.teams].sort((a, b) => (b.totalCap ?? b.rosterSalary) - (a.totalCap ?? a.rosterSalary))
-    : [];
+  const histTeams = snapshot ? [...snapshot.teams].sort((a, b) => {
+    let av: number | string = 0, bv: number | string = 0;
+    if (sort.key === 'name') { av = a.name; bv = b.name; }
+    else if (sort.key === 'totalCap') { av = a.totalCap ?? a.rosterSalary; bv = b.totalCap ?? b.rosterSalary; }
+    else if (sort.key === 'rosterSalary') { av = a.rosterSalary; bv = b.rosterSalary; }
+    else if (sort.key === 'deadCap') { av = a.deadCap ?? 0; bv = b.deadCap ?? 0; }
+    else if (sort.key === 'playerCount') { av = a.playerCount; bv = b.playerCount; }
+    const result = typeof av === 'string' ? av.localeCompare(bv as string) : (av as number) - (bv as number);
+    return sort.dir === 'asc' ? result : -result;
+  }) : [];
+
+  const toggleSort = (key: string) => setSort(prev =>
+    prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' }
+  );
+  const sortMark = (key: string) => sort.key === key ? (sort.dir === 'asc' ? ' ▲' : ' ▼') : ' ↕';
 
   const modalPlayers = modalTeam && snapshot
     ? snapshot.players
@@ -258,8 +271,13 @@ export default function HistoryPanel({ currentData }: Props) {
             <table>
               <thead>
                 <tr>
-                  <th>チーム</th><th>監督</th><th>選手数</th><th>総額</th><th>ロスター合計</th>
-                  <th>デッドキャップ</th><th>ステータス</th><th>データソース</th>
+                  <th onClick={() => toggleSort('name')} style={{cursor:'pointer'}}>チーム{sortMark('name')}</th>
+                  <th>監督</th>
+                  <th onClick={() => toggleSort('playerCount')} style={{cursor:'pointer'}}>選手数{sortMark('playerCount')}</th>
+                  <th onClick={() => toggleSort('totalCap')} style={{cursor:'pointer'}}>総額{sortMark('totalCap')}</th>
+                  <th onClick={() => toggleSort('rosterSalary')} style={{cursor:'pointer'}}>ロスター合計{sortMark('rosterSalary')}</th>
+                  <th onClick={() => toggleSort('deadCap')} style={{cursor:'pointer'}}>デッドキャップ{sortMark('deadCap')}</th>
+                  <th>ステータス</th><th>データソース</th>
                 </tr>
               </thead>
               <tbody>

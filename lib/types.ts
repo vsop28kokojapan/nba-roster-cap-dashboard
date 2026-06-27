@@ -56,6 +56,44 @@ export interface Transaction {
   type: string;
 }
 
+export interface AwardEntry {
+  athleteId: string;
+  athleteName: string;
+}
+
+export interface SeasonAwards {
+  season: string;
+  mvp?: AwardEntry;
+  dpoy?: AwardEntry;
+  roy?: AwardEntry;
+  mip?: AwardEntry;
+  sixthMan?: AwardEntry;
+  finalsMvp?: AwardEntry;
+  nbaCupMvp?: AwardEntry;
+  clutchPlayer?: AwardEntry;
+  allNba1: AwardEntry[];
+  allNba2: AwardEntry[];
+  allNba3: AwardEntry[];
+  allDefense1: AwardEntry[];
+  allDefense2: AwardEntry[];
+  allRookie1: AwardEntry[];
+}
+
+export interface StandingEntry {
+  rank: number;
+  abbr: string;
+  name: string;
+  wins: number;
+  losses: number;
+  logo: string;
+}
+
+export interface SeasonStandings {
+  season: string;
+  east: StandingEntry[];
+  west: StandingEntry[];
+}
+
 export interface DraftPickEntry {
   overall: number;
   round: number;
@@ -78,6 +116,8 @@ export interface NBAData {
   players: Player[];
   transactions: Transaction[];
   draftPicks: Record<string, DraftPickEntry[]>;
+  awards: SeasonAwards[];
+  standings: SeasonStandings[];
 }
 
 // ── 履歴データ型 ──────────────────────────────────────────────

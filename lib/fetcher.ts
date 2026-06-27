@@ -1,4 +1,4 @@
-import type { NBAData, ContractType, HistoricalSnapshot, HistoricalPlayer, HistoricalTeam } from './types';
+import type { NBAData, ContractType, HistoricalSnapshot, HistoricalPlayer, HistoricalTeam, SeasonAwards, AwardEntry, SeasonStandings, StandingEntry } from './types';
 
 const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba';
 
@@ -334,6 +334,92 @@ async function fetchDraftPicks(
   }
 }
 
+const AWARD_KEY_MAP: Record<string, string> = {
+  'MVP': 'mvp',
+  'Defensive Player of the Year': 'dpoy',
+  'Rookie of the Year': 'roy',
+  'Most Improved Player': 'mip',
+  'Sixth Man of the Year': 'sixthMan',
+  'Finals MVP': 'finalsMvp',
+  'NBA Cup MVP': 'nbaCupMvp',
+  'Clutch Player of the Year': 'clutchPlayer',
+  'All-NBA 1st Team': 'allNba1',
+  'All-NBA 2nd Team': 'allNba2',
+  'All-NBA 3rd Team': 'allNba3',
+  'All-Defensive 1st Team': 'allDefense1',
+  'All-Defensive 2nd Team': 'allDefense2',
+  'All-Rookie 1st Team': 'allRookie1',
+};
+const ARRAY_AWARD_KEYS = new Set(['allNba1','allNba2','allNba3','allDefense1','allDefense2','allRookie1']);
+
+async function fetchSeasonAwards(year: number): Promise<SeasonAwards> {
+  const season = `${year - 1}-${String(year).slice(-2)}`;
+  const result: SeasonAwards = { season, allNba1: [], allNba2: [], allNba3: [], allDefense1: [], allDefense2: [], allRookie1: [] };
+  try {
+    const awardsData = await get(`${ESPN_CORE}/seasons/${year}/awards?limit=50`);
+    const awardRefs = ((awardsData.items as Record<string, string>[] | undefined) ?? []).map(i => i['$ref']).filter(Boolean);
+
+    const details = await mapLimit(awardRefs, 8, async (ref: string) => {
+      try {
+        const award = await get(ref) as Record<string, unknown>;
+        const winnerRefs = ((award.winners as Array<{ athlete?: { '$ref': string } }>) ?? [])
+          .map(w => w.athlete?.['$ref'])
+          .filter((r): r is string => Boolean(r));
+        const winners = await mapLimit(winnerRefs, 5, async (athRef: string) => {
+          const id = athRef.match(/athletes\/(\d+)/)?.[1] ?? '';
+          try {
+            const ath = await get(athRef) as Record<string, unknown>;
+            return { athleteId: id, athleteName: String(ath.fullName ?? '—') } as AwardEntry;
+          } catch {
+            return { athleteId: id, athleteName: '—' } as AwardEntry;
+          }
+        });
+        return { name: String(award.name ?? ''), winners };
+      } catch { return null; }
+    });
+
+    for (const d of details) {
+      if (!d) continue;
+      const key = AWARD_KEY_MAP[d.name];
+      if (!key) continue;
+      if (ARRAY_AWARD_KEYS.has(key)) {
+        (result as unknown as Record<string, AwardEntry[]>)[key] = d.winners;
+      } else {
+        (result as unknown as Record<string, AwardEntry | undefined>)[key] = d.winners[0];
+      }
+    }
+  } catch { /* awards unavailable */ }
+  return result;
+}
+
+async function fetchSeasonStandings(year: number): Promise<SeasonStandings> {
+  const season = `${year - 1}-${String(year).slice(-2)}`;
+  try {
+    const data = await get(`https://site.api.espn.com/apis/v2/sports/basketball/nba/standings?season=${year}`);
+    const parseConf = (conf: Record<string, unknown>): StandingEntry[] => {
+      const entries = ((conf.standings as Record<string, unknown>)?.entries as Record<string, unknown>[]) ?? [];
+      return entries.map((e, idx) => {
+        const team = e.team as Record<string, unknown>;
+        const statsArr = (e.stats as Array<{ name: string; displayValue: string }>) ?? [];
+        const stats: Record<string, string> = Object.fromEntries(statsArr.map(s => [s.name, s.displayValue]));
+        const logos = team.logos as Array<{ rel?: string[]; href: string }> | undefined;
+        return {
+          rank: idx + 1,
+          abbr: String(team.abbreviation ?? ''),
+          name: String(team.displayName ?? ''),
+          wins: Number(stats.wins ?? 0),
+          losses: Number(stats.losses ?? 0),
+          logo: logos?.find(l => l.rel?.includes('default'))?.href ?? '',
+        };
+      });
+    };
+    const [east, west] = (data.children as Record<string, unknown>[]) ?? [];
+    return { season, east: east ? parseConf(east) : [], west: west ? parseConf(west) : [] };
+  } catch {
+    return { season, east: [], west: [] };
+  }
+}
+
 // ── 現行シーズンデータ取得 ─────────────────────────────────────
 
 export async function fetchNbaData(): Promise<NBAData> {
@@ -468,7 +554,16 @@ export async function fetchNbaData(): Promise<NBAData> {
   const teamIdToAbbr = new Map<string, string>(
     teams.map((t: Record<string, unknown>) => [String(t.id), t.abbreviation as string])
   );
-  const draftPicks = await fetchDraftPicks(seasonStart, teamIdToAbbr);
+
+  // Fetch draft picks, awards (3 seasons), and standings (3 seasons) in parallel
+  const espnYear = seasonStart + 1; // e.g. 2025-26 → year 2026
+  const [draftPicks, awardsArr, standingsArr] = await Promise.all([
+    fetchDraftPicks(seasonStart, teamIdToAbbr),
+    Promise.all([espnYear, espnYear - 1, espnYear - 2].map(y => fetchSeasonAwards(y).catch(() => null))),
+    Promise.all([espnYear, espnYear - 1, espnYear - 2].map(y => fetchSeasonStandings(y).catch(() => null))),
+  ]);
+  const awards = awardsArr.filter((a): a is SeasonAwards => a !== null);
+  const standings = standingsArr.filter((s): s is SeasonStandings => s !== null);
 
   return {
     meta: {
@@ -486,6 +581,8 @@ export async function fetchNbaData(): Promise<NBAData> {
     players,
     transactions,
     draftPicks,
+    awards,
+    standings,
   };
 }
 

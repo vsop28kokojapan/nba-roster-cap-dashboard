@@ -9,8 +9,9 @@ import ThresholdCards from './ThresholdCards';
 import RuleGuide from './RuleGuide';
 import ContractBadge from './ContractBadge';
 import HistoryPanel from './HistoryPanel';
+import AwardsPanel from './AwardsPanel';
 
-type Tab = 'teams' | 'players' | 'trades' | 'history';
+type Tab = 'teams' | 'players' | 'trades' | 'history' | 'awards';
 
 const SB_URL = 'https://wbojovciyyhkxewjfllz.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indib2pvdmNpeXloa3hld2pmbGx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMDc0NzQsImV4cCI6MjA5Nzc4MzQ3NH0.kfjq4Ww3NKppkbU9GQcKXPAPO2FNnz_BkZseiGhKHDc';
@@ -122,7 +123,27 @@ function TeamGrid({ teams, data, max }: { teams: Team[]; data: NBAData; max: num
   );
 }
 
-function PlayerTable({ players }: { players: Player[] }) {
+function buildAwardBadges(awards: NBAData['awards']): Map<string, string[]> {
+  const map = new Map<string, string[]>();
+  const add = (id: string | undefined, badge: string) => {
+    if (!id) return;
+    const list = map.get(id) ?? [];
+    list.push(badge);
+    map.set(id, list);
+  };
+  for (const s of (awards ?? [])) {
+    add(s.mvp?.athleteId, '👑MVP');
+    add(s.dpoy?.athleteId, '🛡DPOY');
+    add(s.roy?.athleteId, '⭐ROY');
+    add(s.finalsMvp?.athleteId, '🏆FMV');
+    for (const e of s.allNba1) add(e.athleteId, '★');
+    for (const e of s.allNba2) add(e.athleteId, '☆');
+  }
+  return map;
+}
+
+function PlayerTable({ players, awards }: { players: Player[]; awards: NBAData['awards'] }) {
+  const badges = buildAwardBadges(awards);
   return (
     <div className="table-wrap">
       <table>
@@ -144,6 +165,9 @@ function PlayerTable({ players }: { players: Player[] }) {
                   {p.profile
                     ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
                     : p.name}
+                  {(badges.get(p.id) ?? []).map(b => (
+                    <span key={b} className="player-badge" title={b}>{b.replace(/[A-Z]+$/, '')}</span>
+                  ))}
                 </div>
               </td>
               <td>{p.position}</td>
@@ -290,7 +314,7 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
     URL.revokeObjectURL(a.href);
   }
 
-  const showToolbar = tab !== 'history';
+  const showToolbar = tab !== 'history' && tab !== 'awards';
 
   return (
     <>
@@ -312,12 +336,13 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
         <RuleGuide thresholds={data.thresholds} />
 
         <nav className="tabs">
-          {(['teams', 'players', 'trades', 'history'] as Tab[]).map(t => (
+          {(['teams', 'players', 'trades', 'history', 'awards'] as Tab[]).map(t => (
             <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
               {t === 'teams' ? 'チーム'
                 : t === 'players' ? '選手'
                 : t === 'trades' ? 'トレード・異動'
-                : '履歴'}
+                : t === 'history' ? '履歴'
+                : 'アワード'}
             </button>
           ))}
         </nav>
@@ -367,7 +392,7 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
         )}
         {tab === 'players' && (
           <section className="panel active">
-            <PlayerTable players={filteredPlayers} />
+            <PlayerTable players={filteredPlayers} awards={data.awards ?? []} />
           </section>
         )}
         {tab === 'trades' && (
@@ -378,6 +403,14 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
         {tab === 'history' && (
           <section className="panel active">
             <HistoryPanel currentData={data} />
+          </section>
+        )}
+        {tab === 'awards' && (
+          <section className="panel active">
+            {(data.awards?.length ?? 0) > 0
+              ? <AwardsPanel data={data} />
+              : <p style={{ color: '#8097aa', padding: '40px 0' }}>アワードデータがまだ取得されていません。「↻ データを更新」を実行してください。</p>
+            }
           </section>
         )}
 

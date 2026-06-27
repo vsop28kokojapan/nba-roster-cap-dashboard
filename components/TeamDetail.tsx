@@ -72,11 +72,32 @@ interface Props {
   data: NBAData;
 }
 
+function buildBadges(awards: NBAData['awards']): Map<string, string[]> {
+  const map = new Map<string, string[]>();
+  const add = (id: string | undefined, b: string) => {
+    if (!id) return;
+    const arr = map.get(id) ?? [];
+    arr.push(b);
+    map.set(id, arr);
+  };
+  for (const s of awards ?? []) {
+    add(s.mvp?.athleteId, `👑MVP`);
+    add(s.dpoy?.athleteId, `🛡DPOY`);
+    add(s.roy?.athleteId, `⭐ROY`);
+    add(s.finalsMvp?.athleteId, `🏆Final`);
+    for (const e of s.allNba1) add(e.athleteId, `★All-NBA1`);
+    for (const e of s.allNba2) add(e.athleteId, `☆All-NBA2`);
+    for (const e of s.allRookie1) add(e.athleteId, `⭐Rookie`);
+  }
+  return map;
+}
+
 export default function TeamDetail({ team: t, players, data }: Props) {
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: 'salary', dir: 'desc' });
 
   const max = capScale(data.teams, data.thresholds.secondApron);
   const total = t.totalCap ?? t.rosterSalary;
+  const awardBadges = buildBadges(data.awards);
 
   const roster = [...players].sort((a, b) => {
     const isMissing = (p: Player) =>
@@ -169,6 +190,9 @@ export default function TeamDetail({ team: t, players, data }: Props) {
                         {p.profile
                           ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
                           : p.name}
+                        {(awardBadges.get(p.id) ?? []).map(b => (
+                          <span key={b} className="player-badge" title={b.replace(/^[^\w]+/, '')}>{b.match(/^[^\w]+/)?.[0] ?? b}</span>
+                        ))}
                       </div>
                     </td>
                     <td>{p.position}</td>
