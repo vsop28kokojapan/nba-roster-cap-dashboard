@@ -198,7 +198,7 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
   background: #f6f9fc;
   min-height: 195px;
 }
-.rule > span {
+.rule-num {
   display: grid;
   place-items: center;
   width: 26px; height: 26px;
@@ -206,23 +206,79 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
   background: #dfeaf8;
   color: #174f96;
   font-weight: 900;
+  font-size: 13px;
 }
-.rule h3 { margin: 12px 0 7px; font-size: 16px; }
-.rule p { margin: 0; color: #516276; font-size: 13px; line-height: 1.65; }
+.rule-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: #fff;
+  background: #4a6880;
+  border-radius: 4px;
+  padding: 1px 5px;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+.rule h3 { margin: 10px 0 5px; font-size: 15px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.rule p { margin: 0 0 10px; color: #516276; font-size: 13px; line-height: 1.65; }
 .rule small { display: block; margin-top: 12px; font-weight: 800; color: #253d58; }
+.rule-detail-box {
+  background: rgba(255,255,255,.7);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #3d5266;
+  line-height: 1.6;
+  margin-top: 8px;
+}
+.rule-detail-box b { display: block; margin-bottom: 4px; color: #1d3a55; }
+.rule-detail-box ul { margin: 4px 0 0 16px; padding: 0; }
+.rule-detail-box li { margin-bottom: 2px; }
 .rule.cap    { border-color: #4285d4; }
 .rule.tax    { border-color: #e2b632; }
 .rule.first  { border-color: #ee7e2f; }
 .rule.second { border-color: #d63a49; }
+.rule-faq { margin-top: 16px; display: flex; flex-direction: column; gap: 4px; }
 .rule-details {
-  margin-top: 14px;
-  border-top: 1px solid var(--line);
-  padding-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
   color: #455a70;
   font-size: 13px;
+  background: #f9fbfd;
 }
-.rule-details summary { cursor: pointer; font-weight: 800; color: #245a9b; }
-.rule-details p { line-height: 1.7; }
+.rule-details summary { cursor: pointer; font-weight: 700; color: #245a9b; list-style: none; }
+.rule-details summary::before { content: '+ '; }
+.rule-details[open] summary::before { content: '− '; }
+.rule-details p { line-height: 1.7; margin: 10px 0 0; }
+
+/* ── draft picks ── */
+.draft-picks-section {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.draft-picks-section h3 { margin: 0 0 14px; font-size: 17px; }
+.draft-picks-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.draft-pick-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #f0f5fa;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 140px;
+  border-left: 4px solid #4285d4;
+}
+.draft-pick-card.r2 { border-left-color: #8aabcf; background: #f5f7fa; }
+.dp-round { font-size: 10px; font-weight: 800; letter-spacing: .1em; color: #5a7a9a; text-transform: uppercase; }
+.dp-overall { font-size: 18px; font-weight: 900; color: #0d2d52; letter-spacing: -.02em; }
+.dp-name { font-size: 13px; font-weight: 600; color: #1d3d5c; }
+.dp-trade { font-size: 11px; color: #7090a8; margin-top: 3px; }
 
 /* ── cap comparison chart ── */
 .cap-comparison {

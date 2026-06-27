@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { NBAData, Player, Team, Thresholds } from '@/lib/types';
+import { NBAData, Player, Team, Thresholds, DraftPickEntry } from '@/lib/types';
 import { yen, badgeClass, lineDifference, capScale } from '@/lib/utils';
 import CapTrack from './CapTrack';
 
@@ -31,6 +31,40 @@ const COLUMNS: [SortKey, string][] = [
   ['yearsRemaining', '残年数'],
   ['tradeRestricted', 'トレード制限'],
 ];
+
+function DraftPicksSection({ picks, season }: { picks: DraftPickEntry[]; season: string }) {
+  if (picks.length === 0) return null;
+  const draftYear = Number(season.slice(0, 4)) + 1;
+  const r1 = picks.filter(p => p.round === 1).sort((a, b) => a.overall - b.overall);
+  const r2 = picks.filter(p => p.round === 2).sort((a, b) => a.overall - b.overall);
+  return (
+    <section className="draft-picks-section">
+      <h3>{draftYear} ドラフト指名</h3>
+      <div className="draft-picks-grid">
+        {r1.map(p => (
+          <div key={p.overall} className="draft-pick-card r1">
+            <span className="dp-round">1巡目</span>
+            <span className="dp-overall">#{p.overall}全体</span>
+            <span className="dp-name">{p.playerName}</span>
+            {p.traded && p.tradeNote && (
+              <span className="dp-trade">via {p.tradeNote}</span>
+            )}
+          </div>
+        ))}
+        {r2.map(p => (
+          <div key={p.overall} className="draft-pick-card r2">
+            <span className="dp-round">2巡目</span>
+            <span className="dp-overall">#{p.overall}全体</span>
+            <span className="dp-name">{p.playerName}</span>
+            {p.traded && p.tradeNote && (
+              <span className="dp-trade">via {p.tradeNote}</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 interface Props {
   team: Team;
@@ -103,6 +137,8 @@ export default function TeamDetail({ team: t, players, data }: Props) {
             ))}
           </div>
         </section>
+
+        <DraftPicksSection picks={data.draftPicks?.[t.abbreviation] ?? []} season={data.meta.season} />
 
         <section>
           <div className="detail-roster-title">

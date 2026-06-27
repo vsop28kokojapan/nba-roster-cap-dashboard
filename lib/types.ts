@@ -56,6 +56,15 @@ export interface Transaction {
   type: string;
 }
 
+export interface DraftPickEntry {
+  overall: number;
+  round: number;
+  pick: number;
+  playerName: string;
+  traded: boolean;
+  tradeNote: string | null;
+}
+
 export interface NBAData {
   meta: {
     updatedAt: string;
@@ -68,6 +77,7 @@ export interface NBAData {
   teams: Team[];
   players: Player[];
   transactions: Transaction[];
+  draftPicks: Record<string, DraftPickEntry[]>;
 }
 
 // ── 履歴データ型 ──────────────────────────────────────────────

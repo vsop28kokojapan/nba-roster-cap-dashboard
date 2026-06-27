@@ -279,6 +279,61 @@ function translateTransaction(description = ''): string {
     .replace(/cashとドラフト関連の権利/gi, '金銭およびドラフト関連の権利');
 }
 
+const ESPN_CORE = 'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba';
+
+async function fetchDraftPicks(
+  seasonStart: number,
+  teamIdToAbbr: Map<string, string>
+): Promise<Record<string, import('./types').DraftPickEntry[]>> {
+  const draftYear = seasonStart + 1; // 2025-26 season → 2026 draft
+  try {
+    const rounds = await get(`${ESPN_CORE}/seasons/${draftYear}/draft/rounds`);
+    if (!rounds.items?.length) return {};
+
+    const allPickRefs: { ref: string; meta: Omit<import('./types').DraftPickEntry, 'playerName'>; teamId: string }[] = [];
+    for (const rnd of rounds.items as Record<string, unknown>[]) {
+      const picks = (rnd.picks as Record<string, unknown>[]) ?? [];
+      for (const p of picks) {
+        const athRef = (p.athlete as Record<string, string> | undefined)?.['$ref'];
+        const teamRef = (p.team as Record<string, string> | undefined)?.['$ref'];
+        const teamId = teamRef?.split('/teams/')?.[1]?.split('?')?.[0] ?? '';
+        if (!athRef || !teamId) continue;
+        allPickRefs.push({
+          ref: athRef,
+          meta: {
+            overall: p.overall as number,
+            round: p.round as number,
+            pick: p.pick as number,
+            traded: Boolean(p.traded),
+            tradeNote: (p.tradeNote as string) || null,
+          },
+          teamId,
+        });
+      }
+    }
+
+    const resolved = await mapLimit(allPickRefs, 10, async item => {
+      try {
+        const ath = await get(item.ref);
+        return { ...item, playerName: (ath.fullName as string) || '—' };
+      } catch {
+        return { ...item, playerName: '—' };
+      }
+    });
+
+    const result: Record<string, import('./types').DraftPickEntry[]> = {};
+    for (const r of resolved) {
+      const abbr = teamIdToAbbr.get(r.teamId);
+      if (!abbr) continue;
+      if (!result[abbr]) result[abbr] = [];
+      result[abbr].push({ playerName: r.playerName, ...r.meta });
+    }
+    return result;
+  } catch {
+    return {};
+  }
+}
+
 // ── 現行シーズンデータ取得 ─────────────────────────────────────
 
 export async function fetchNbaData(): Promise<NBAData> {
@@ -409,6 +464,12 @@ export async function fetchNbaData(): Promise<NBAData> {
       : 'その他',
   }));
 
+  // ESPN internal team ID → abbreviation map (for draft picks resolution)
+  const teamIdToAbbr = new Map<string, string>(
+    teams.map((t: Record<string, unknown>) => [String(t.id), t.abbreviation as string])
+  );
+  const draftPicks = await fetchDraftPicks(seasonStart, teamIdToAbbr);
+
   return {
     meta: {
       updatedAt: new Date().toISOString(),
@@ -424,6 +485,7 @@ export async function fetchNbaData(): Promise<NBAData> {
     teams: teamRows,
     players,
     transactions,
+    draftPicks,
   };
 }
 
