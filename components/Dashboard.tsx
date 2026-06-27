@@ -12,6 +12,7 @@ import HistoryPanel from './HistoryPanel';
 import AwardsPanel from './AwardsPanel';
 import Scoreboard from './Scoreboard';
 import StandingsHero from './StandingsHero';
+import TournamentSection from './TournamentSection';
 
 type Tab = 'teams' | 'players' | 'trades' | 'history' | 'awards';
 
@@ -322,8 +323,8 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
     <>
       <header>
         <div>
-          <p className="eyebrow">NBA OPERATIONS DESK</p>
-          <h1>Roster &amp; Cap Board</h1>
+          <p className="eyebrow">NBA ANALYTICS</p>
+          <h1>THE FRONT OFFICE</h1>
           <p className="meta">
             {data.meta.season} · 更新 {new Date(data.meta.updatedAt).toLocaleString('ja-JP')} · {data.players.length}選手
           </p>
@@ -336,6 +337,12 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
       <main>
         <Scoreboard />
         {(data.standings?.length ?? 0) > 0 && <StandingsHero standings={data.standings[0]} />}
+        {(data.standings?.length ?? 0) > 0 && (
+          <TournamentSection
+            standings={data.standings[0]}
+            awards={data.awards?.[0]}
+          />
+        )}
         <ThresholdCards thresholds={data.thresholds} />
         <RuleGuide thresholds={data.thresholds} />
 

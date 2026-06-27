@@ -748,6 +748,113 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
   .hist-modal { padding: 18px; }
 }
 
+/* ── Tournament / Bracket ── */
+.tournament-section {
+  background: #f8fafc;
+  border-bottom: 1px solid var(--line);
+  padding: 28px max(24px, calc((100vw - 1440px) / 2));
+}
+.tournament-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.tournament-title { font-size: 20px; font-weight: 900; margin: 0; color: var(--navy); letter-spacing: -.02em; }
+.tournament-season { font-size: 12px; color: #8a9daf; margin: 0; }
+.tournament-tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+.tournament-tab {
+  padding: 7px 18px; border-radius: 20px; font-size: 13px; font-weight: 600;
+  border: 2px solid #d0dde8; background: white; color: #5a7088; cursor: pointer;
+}
+.tournament-tab.active { background: var(--navy); color: white; border-color: var(--navy); }
+.tournament-tab:hover:not(.active) { background: #edf3f8; }
+
+/* Bracket team pill */
+.bracket-team {
+  display: flex; align-items: center; gap: 7px;
+  background: white; border: 1px solid #dce5ef; border-radius: 9px;
+  padding: 8px 12px; width: 100%; text-decoration: none; color: var(--ink);
+  transition: all .15s; cursor: pointer;
+}
+.bracket-team:hover { border-color: var(--blue); box-shadow: 0 2px 8px #0059b220; }
+.bracket-team.placeholder { color: #aabbc8; font-size: 12px; font-style: italic; background: #f4f7fb; border-style: dashed; }
+.bt-seed { font-size: 11px; color: #8aaec9; font-weight: 700; width: 16px; }
+.bt-abbr { font-weight: 800; font-size: 13px; flex: 1; }
+.bt-rec { font-size: 11px; color: #8a9daf; margin-left: auto; }
+
+/* Matchup card */
+.bracket-matchup {
+  position: relative; margin-bottom: 10px;
+  background: white; border-radius: 12px; padding: 10px;
+  border: 1px solid var(--line); box-shadow: 0 1px 4px #00000008;
+}
+.bracket-matchup-label {
+  display: block; font-size: 10px; color: #8a9daf; text-transform: uppercase;
+  letter-spacing: .06em; margin-bottom: 6px;
+}
+.bracket-vs {
+  text-align: center; font-size: 10px; color: #c0ccd8; font-weight: 700;
+  padding: 3px 0; text-transform: uppercase; letter-spacing: .1em;
+}
+
+/* Playoff bracket */
+.playoff-bracket-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 820px) { .playoff-bracket-wrap { grid-template-columns: 1fr; } }
+.playoff-conf-bracket { }
+.bracket-conf-title {
+  font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;
+  color: #7a8fa0; margin: 0 0 12px;
+}
+.playoff-rounds { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .playoff-rounds { grid-template-columns: 1fr; } }
+.playoff-round { }
+.round-label {
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;
+  color: #8aaec9; margin: 0 0 8px; padding-bottom: 6px;
+  border-bottom: 2px solid #e8f0f8;
+}
+.playoff-finals {
+  grid-column: 1 / -1; margin-top: 20px;
+  background: linear-gradient(135deg, #f8f4e8, #fff8ec);
+  border: 1px solid var(--gold); border-radius: 14px; padding: 20px;
+  max-width: 320px;
+}
+.finals-label { color: #b07d00 !important; }
+.finals-note { font-size: 12px; color: #9a7a30; margin-top: 8px; }
+
+/* Play-In */
+.playin-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 720px) { .playin-section { grid-template-columns: 1fr; } }
+.playin-conf { }
+.playin-grid { display: grid; gap: 12px; }
+.playin-note { font-size: 11px; color: #8a9daf; margin: 8px 0 0; font-style: italic; }
+
+/* NBA Cup */
+.cup-section { max-width: 720px; }
+.cup-hero {
+  display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px;
+  background: linear-gradient(135deg, #0a1e35, #0d2a4a);
+  border-radius: 14px; padding: 20px; color: white;
+}
+.cup-trophy { font-size: 36px; flex-shrink: 0; }
+.cup-title { font-size: 16px; font-weight: 800; margin: 0 0 4px; }
+.cup-sub { font-size: 12px; color: #8ab2d0; margin: 0; line-height: 1.5; }
+.cup-mvp-card {
+  display: flex; align-items: center; gap: 12px;
+  background: white; border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 16px;
+}
+.cup-mvp-icon { font-size: 24px; }
+.cup-mvp-label { font-size: 10px; color: #8a9daf; text-transform: uppercase; letter-spacing: .1em; margin: 0 0 2px; }
+.cup-mvp-name { font-size: 16px; font-weight: 800; margin: 0; }
+.cup-bracket-note {
+  background: #f4f7fb; border-radius: 10px; padding: 14px 16px;
+  font-size: 13px; color: #516276; line-height: 1.6;
+}
+.cup-bracket-note p { margin: 0 0 6px; }
+.cup-bracket-note p:last-child { margin-bottom: 0; }
+.cup-note-sub { font-size: 11px; color: #9aadbe; font-style: italic; }
+.bracket-disclaimer { font-size: 11px; color: #9aadbe; margin-top: 20px; font-style: italic; }
+
+.sth-team-cell { display: flex; align-items: center; gap: 7px; text-decoration: none; color: inherit; }
+.sth-team-cell:hover .sth-abbr { color: var(--blue); }
+
 /* ── Player stats columns ── */
 .stats-col { text-align: right; font-variant-numeric: tabular-nums; color: #2a4a65; font-size: 13px; min-width: 44px; }
 th.stats-col { color: #8a9daf; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; text-align: right; }

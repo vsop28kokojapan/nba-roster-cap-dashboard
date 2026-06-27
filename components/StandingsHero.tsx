@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { SeasonStandings, StandingEntry } from '@/lib/types';
 
 function ConfTable({ entries, label }: { entries: StandingEntry[]; label: string }) {
@@ -27,14 +28,14 @@ function ConfTable({ entries, label }: { entries: StandingEntry[]; label: string
                   {e.rank}
                 </td>
                 <td>
-                  <div className="sth-team-cell">
+                  <Link href={`/team/${e.abbr}`} className="sth-team-cell">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {e.logo && <img src={e.logo} alt={e.abbr} width={22} height={22} />}
                     <span>
                       <b className="sth-abbr">{e.abbr}</b>
                       <span className="sth-name"> {e.name}</span>
                     </span>
-                  </div>
+                  </Link>
                 </td>
                 <td><b>{e.wins}</b></td>
                 <td className="sth-losses">{e.losses}</td>
