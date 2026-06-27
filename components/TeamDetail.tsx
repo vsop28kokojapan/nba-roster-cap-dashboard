@@ -80,6 +80,7 @@ export default function TeamDetail({ team: t, players, data }: Props) {
             <p className="eyebrow dark">TEAM CAP DETAIL</p>
             <h2>{t.name}</h2>
             <span className={`badge ${badgeClass(t.apronStatus)}`}>{t.apronStatus}</span>
+            {t.coach && <p className="coach-label">HC: {t.coach}</p>}
           </div>
         </div>
 

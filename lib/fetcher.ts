@@ -123,6 +123,27 @@ function apronStatus(
   return 'キャップ内';
 }
 
+// ESPNロスターAPIは直接配列 or ポジション別グループ({position,items})の2形式がある
+function flattenAthletes(raw: unknown): Record<string, unknown>[] {
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+  const first = raw[0] as Record<string, unknown>;
+  if (Array.isArray(first.items)) {
+    return raw.flatMap(g => {
+      const grp = g as Record<string, unknown>;
+      return Array.isArray(grp.items) ? (grp.items as Record<string, unknown>[]) : [];
+    });
+  }
+  return raw as Record<string, unknown>[];
+}
+
+function extractCoach(payload: Record<string, unknown>): string | null {
+  const arr = payload.coach as Array<Record<string, unknown>> | undefined;
+  if (!Array.isArray(arr) || arr.length === 0) return null;
+  const head = arr.find(c => (c.specialties as string[] | undefined)?.includes('head')) ?? arr[0];
+  const name = `${head.firstName ?? ''} ${head.lastName ?? ''}`.trim();
+  return name || null;
+}
+
 function detectContractType(
   espnType: unknown,
   salary: number | null,
@@ -270,10 +291,12 @@ export async function fetchNbaData(): Promise<NBAData> {
     `${new Date().getUTCFullYear() - 1}-${String(new Date().getUTCFullYear()).slice(-2)}`;
   const seasonStart = Number(season.slice(0, 4));
 
+  const rosterPayloads = new Map<string, Record<string, unknown>>();
   const rosters = await mapLimit(teams, 6, async (team: Record<string, unknown>) => {
     const abbr = (team.abbreviation as string).toLowerCase();
     const payload = await get(`${ESPN}/teams/${abbr}/roster`);
-    return (payload.athletes as Record<string, unknown>[]).map(a => {
+    rosterPayloads.set(team.abbreviation as string, payload);
+    return flattenAthletes(payload.athletes).map(a => {
       const contract = a.contract as Record<string, unknown> | undefined;
       const salary = (contract?.salary as number | null) ?? null;
       const espnType = contract?.contractType ?? contract?.type ?? null;
@@ -353,6 +376,7 @@ export async function fetchNbaData(): Promise<NBAData> {
     const rosterSalary = roster.reduce((sum, p) => sum + (p.salary || 0), 0);
     const total = reported?.totalCap || rosterSalary;
     const logos = team.logos as Array<{ rel?: string[]; href: string }> | undefined;
+    const rosterPayload = rosterPayloads.get(abbr) ?? {};
     return {
       id: team.id as string,
       abbreviation: abbr,
@@ -367,6 +391,7 @@ export async function fetchNbaData(): Promise<NBAData> {
       capSpace: reported?.capSpace ?? null,
       apronStatus: apronStatus(total, thresholds),
       capSource: reported ? 'Spotrac' : 'ESPNロスター合計（概算）',
+      coach: extractCoach(rosterPayload),
     };
   });
 
@@ -412,27 +437,27 @@ export async function fetchHistoricalSeason(year: number): Promise<HistoricalSna
     .map((x: { team: unknown }) => x.team as Record<string, unknown>)
     .filter((x: Record<string, unknown>) => x.isActive && !x.isAllStar);
 
-  // ESPNの過去シーズンAPIはstart-year / end-year の両方を試す
+  // ESPNの過去シーズンはstart-year / end-year 両方試す。直接配列とポジション別グループ両対応。
   const espnYears = [year, year + 1];
+  const histRosterPayloads = new Map<string, Record<string, unknown>>();
 
   const rosters = await mapLimit(teams, 6, async (team: Record<string, unknown>) => {
     const abbr = (team.abbreviation as string).toLowerCase();
     try {
+      let bestPayload: Record<string, unknown> = {};
       let athletes: Record<string, unknown>[] = [];
       for (const ey of espnYears) {
-        const payload = await get(`${ESPN}/teams/${abbr}/roster?season=${ey}`).catch(() => ({}));
-        // direct array
-        if (Array.isArray(payload.athletes) && payload.athletes.length > 0) {
-          athletes = payload.athletes as Record<string, unknown>[];
+        const payload = await get(`${ESPN}/teams/${abbr}/roster?season=${ey}`).catch(() => ({})) as Record<string, unknown>;
+        const flat = flattenAthletes(payload.athletes);
+        if (flat.length > 0) {
+          athletes = flat;
+          bestPayload = payload;
           break;
         }
-        // nested under roster key
-        const nested = (payload.roster as Record<string, unknown> | undefined)?.athletes;
-        if (Array.isArray(nested) && nested.length > 0) {
-          athletes = nested as Record<string, unknown>[];
-          break;
-        }
+        // keep first payload for coach extraction even if no athletes
+        if (!Object.keys(bestPayload).length) bestPayload = payload;
       }
+      histRosterPayloads.set(team.abbreviation as string, bestPayload);
       return athletes.map(a => {
         const contract = a.contract as Record<string, unknown> | undefined;
         const salary = (contract?.salary as number | null) ?? null;
@@ -473,6 +498,7 @@ export async function fetchHistoricalSeason(year: number): Promise<HistoricalSna
     const rosterSalary = roster.reduce((sum, p) => sum + (p.salary || 0), 0);
     const total = reported?.totalCap || rosterSalary;
     const logos = team.logos as Array<{ rel?: string[]; href: string }> | undefined;
+    const rp = histRosterPayloads.get(abbr) ?? {};
     return {
       abbreviation: abbr,
       name: team.displayName as string,
@@ -486,6 +512,7 @@ export async function fetchHistoricalSeason(year: number): Promise<HistoricalSna
       capSpace: reported?.capSpace ?? null,
       apronStatus: apronStatus(total, thresholdsHist),
       capSource: reported ? 'Spotrac' : 'ESPNロスター合計（概算）',
+      coach: extractCoach(rp),
     };
   });
 

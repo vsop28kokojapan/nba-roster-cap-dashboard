@@ -1,13 +1,77 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import type { NBAData, HistoricalSnapshot } from '@/lib/types';
+import type { NBAData, HistoricalSnapshot, HistoricalTeam } from '@/lib/types';
 import { yen, million, badgeClass } from '@/lib/utils';
 import ContractBadge from './ContractBadge';
 import SalaryTrend from './SalaryTrend';
 
 interface Props {
   currentData: NBAData;
+}
+
+function TeamModal({
+  team,
+  season,
+  players,
+  onClose,
+}: {
+  team: HistoricalTeam;
+  season: string;
+  players: { id: string; name: string; position: string; salary: number | null; yearsRemaining: number | null; contractType: import('@/lib/types').ContractType }[];
+  onClose: () => void;
+}) {
+  return (
+    <div className="hist-modal-overlay" onClick={onClose}>
+      <div className="hist-modal" onClick={e => e.stopPropagation()}>
+        <button className="hist-modal-close" onClick={onClose}>✕</button>
+        <div className="hist-modal-head">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {team.logo && <img src={team.logo} alt={team.name} width={52} height={52} />}
+          <div>
+            <p className="eyebrow dark">{season}</p>
+            <h3>{team.name}</h3>
+            {team.coach && <p className="coach-label">HC: {team.coach}</p>}
+            <span className={`badge ${badgeClass(team.apronStatus)}`} style={{ marginTop: 4 }}>
+              {team.apronStatus}
+            </span>
+          </div>
+        </div>
+
+        <div className="hist-modal-metrics">
+          <div><small>総キャップ</small><strong>{million(team.totalCap ?? team.rosterSalary)}</strong></div>
+          <div><small>ロスター合計</small><strong>{million(team.rosterSalary)}</strong></div>
+          <div><small>デッドキャップ</small><strong>{team.deadCap != null ? million(team.deadCap) : '—'}</strong></div>
+          <div><small>データソース</small><strong style={{ fontSize: 12 }}>{team.capSource}</strong></div>
+        </div>
+
+        {players.length > 0 ? (
+          <div className="table-wrap" style={{ marginTop: 16 }}>
+            <table>
+              <thead>
+                <tr>
+                  <th>選手</th><th>POS</th><th>サラリー</th><th>残年数</th><th>契約</th>
+                </tr>
+              </thead>
+              <tbody>
+                {players.map(p => (
+                  <tr key={p.id}>
+                    <td>{p.name}</td>
+                    <td>{p.position}</td>
+                    <td><b>{yen(p.salary)}</b></td>
+                    <td>{p.yearsRemaining ?? '—'}</td>
+                    <td><ContractBadge type={p.contractType} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="hist-no-roster">選手データなし（過去シーズンはチームキャップ情報のみ）</p>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function HistoryPanel({ currentData }: Props) {
@@ -17,8 +81,8 @@ export default function HistoryPanel({ currentData }: Props) {
   const [loadedData, setLoadedData] = useState<Map<string, HistoricalSnapshot>>(new Map());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [modalTeam, setModalTeam] = useState<HistoricalTeam | null>(null);
 
-  // Fetch available seasons on mount
   useEffect(() => {
     fetch('/api/history')
       .then(r => r.json())
@@ -30,7 +94,6 @@ export default function HistoryPanel({ currentData }: Props) {
       .catch(() => setError('履歴シーズン一覧の取得に失敗しました'));
   }, []);
 
-  // Load snapshot when season changes
   useEffect(() => {
     if (!selectedSeason || loadedData.has(selectedSeason)) return;
     setLoading(true);
@@ -49,16 +112,13 @@ export default function HistoryPanel({ currentData }: Props) {
 
   const snapshot = loadedData.get(selectedSeason);
 
-  // Build trend data for selected team across all loaded snapshots
   const trendPoints = useCallback(() => {
     if (!selectedTeam) return [];
     const points: { season: string; totalCap: number | null; rosterSalary: number }[] = [];
-    // Historical snapshots
     for (const [season, snap] of loadedData) {
       const team = snap.teams.find(t => t.abbreviation === selectedTeam);
       if (team) points.push({ season, totalCap: team.totalCap, rosterSalary: team.rosterSalary });
     }
-    // Current season
     const cur = currentData.teams.find(t => t.abbreviation === selectedTeam);
     if (cur) {
       points.push({
@@ -82,14 +142,19 @@ export default function HistoryPanel({ currentData }: Props) {
     ? [...snapshot.teams].sort((a, b) => (b.totalCap ?? b.rosterSalary) - (a.totalCap ?? a.rosterSalary))
     : [];
 
+  const modalPlayers = modalTeam && snapshot
+    ? snapshot.players
+        .filter(p => p.team === modalTeam.abbreviation)
+        .sort((a, b) => (b.salary ?? 0) - (a.salary ?? 0))
+    : [];
+
   if (availSeasons.length === 0 && !loading && !error) {
     return (
       <div className="history-empty">
         <p className="eyebrow dark">過去シーズンデータなし</p>
         <h3>履歴データがまだ登録されていません</h3>
-        <p>以下のコマンドで各シーズンのデータを取得・保存できます（CRON_SECRET が必要）：</p>
-        <pre>{`curl "https://<your-vercel-url>/api/history-update?season=2024-25" \\
-  -H "Authorization: Bearer <CRON_SECRET>"`}</pre>
+        <p>以下のURLをブラウザで開いて各シーズンのデータを取得してください：</p>
+        <pre>{`https://<your-vercel-url>/api/history-update?season=2024-25`}</pre>
         <p>対応シーズン：<code>2015-16</code> ～ <code>2024-25</code></p>
       </div>
     );
@@ -97,7 +162,15 @@ export default function HistoryPanel({ currentData }: Props) {
 
   return (
     <div className="history-panel">
-      {/* Controls */}
+      {modalTeam && snapshot && (
+        <TeamModal
+          team={modalTeam}
+          season={selectedSeason}
+          players={modalPlayers}
+          onClose={() => setModalTeam(null)}
+        />
+      )}
+
       <div className="history-controls">
         <div>
           <label htmlFor="hist-season">シーズン</label>
@@ -128,7 +201,6 @@ export default function HistoryPanel({ currentData }: Props) {
         {error && <span className="hist-error">{error}</span>}
       </div>
 
-      {/* Salary trend chart (shown when a team is selected) */}
       {selectedTeam && (
         <div className="history-chart-wrap">
           <p className="eyebrow dark">サラリートレンド · {selectedTeam}</p>
@@ -149,7 +221,6 @@ export default function HistoryPanel({ currentData }: Props) {
         </div>
       )}
 
-      {/* Team roster for selected season + team */}
       {snapshot && selectedTeam && (
         <div className="hist-roster-wrap">
           <p className="eyebrow dark">ロスター · {selectedSeason} · {selectedTeam}</p>
@@ -180,21 +251,24 @@ export default function HistoryPanel({ currentData }: Props) {
         </div>
       )}
 
-      {/* All teams table for selected season */}
       {snapshot && !selectedTeam && (
         <div className="hist-all-teams">
-          <p className="eyebrow dark">{selectedSeason} · 全チームキャップ状況</p>
+          <p className="eyebrow dark">{selectedSeason} · 全チームキャップ状況 <span className="hist-click-hint">（行をクリックで詳細）</span></p>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>チーム</th><th>選手数</th><th>総額</th><th>ロスター合計</th>
+                  <th>チーム</th><th>監督</th><th>選手数</th><th>総額</th><th>ロスター合計</th>
                   <th>デッドキャップ</th><th>ステータス</th><th>データソース</th>
                 </tr>
               </thead>
               <tbody>
                 {histTeams.map(t => (
-                  <tr key={t.abbreviation}>
+                  <tr
+                    key={t.abbreviation}
+                    className="hist-team-row"
+                    onClick={() => setModalTeam(t)}
+                  >
                     <td>
                       <div className="hist-team-cell">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -202,6 +276,7 @@ export default function HistoryPanel({ currentData }: Props) {
                         <span><b>{t.abbreviation}</b> {t.name}</span>
                       </div>
                     </td>
+                    <td style={{ fontSize: 12, color: '#4a5f70' }}>{t.coach ?? '—'}</td>
                     <td>{t.playerCount}</td>
                     <td><b>{million(t.totalCap ?? t.rosterSalary)}</b></td>
                     <td>{million(t.rosterSalary)}</td>

@@ -21,6 +21,7 @@ export interface Team {
   capSpace: number | null;
   apronStatus: string;
   capSource: string;
+  coach: string | null;
 }
 
 export interface Player {
@@ -84,6 +85,7 @@ export interface HistoricalTeam {
   capSpace: number | null;
   apronStatus: string;
   capSource: string;
+  coach: string | null;
 }
 
 export interface HistoricalPlayer {

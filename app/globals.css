@@ -538,3 +538,60 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
   .history-controls { flex-direction: column; align-items: stretch; }
   .history-controls select { min-width: 0; width: 100%; }
 }
+
+/* ── coach label ── */
+.coach-label { margin: 4px 0 0; font-size: 13px; color: #4a5f70; font-weight: 500; }
+
+/* ── history table clickable rows ── */
+.hist-team-row { cursor: pointer; transition: background 0.12s; }
+.hist-team-row:hover { background: #edf3f8; }
+.hist-click-hint { font-size: 11px; color: #8097aa; font-weight: 400; margin-left: 6px; }
+
+/* ── history team modal ── */
+.hist-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(7, 24, 43, 0.52);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.hist-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(7,24,43,0.22);
+}
+.hist-modal-close {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none;
+  font-size: 18px; color: #556070;
+  cursor: pointer; padding: 4px 8px;
+  border-radius: 6px;
+}
+.hist-modal-close:hover { background: #edf3f8; }
+.hist-modal-head {
+  display: flex; gap: 16px; align-items: flex-start;
+  margin-bottom: 20px;
+}
+.hist-modal-head img { flex-shrink: 0; margin-top: 2px; }
+.hist-modal-head h3 { margin: 2px 0 4px; font-size: 20px; }
+.hist-modal-metrics {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-bottom: 8px;
+}
+.hist-modal-metrics > div {
+  background: #f0f5fa; border-radius: 9px; padding: 10px 12px;
+}
+.hist-modal-metrics small { display: block; font-size: 10px; color: #6e7f90; margin-bottom: 3px; }
+.hist-modal-metrics strong { font-size: 14px; }
+.hist-no-roster { color: #8097aa; font-size: 13px; margin-top: 16px; }
+
+@media (max-width: 500px) {
+  .hist-modal-metrics { grid-template-columns: repeat(2, 1fr); }
+  .hist-modal { padding: 18px; }
+}
