@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { NBAData, Player, Team, Thresholds, DraftPickEntry } from '@/lib/types';
 import { yen, badgeClass, lineDifference, capScale } from '@/lib/utils';
@@ -24,12 +24,12 @@ const LINE_LABELS: [string, keyof Thresholds][] = [
 ];
 
 const COLUMNS: [SortKey, string][] = [
-  ['jersey', '背番号'],
+  ['jersey', '#'],
   ['name', '選手'],
   ['position', 'POS'],
   ['salary', 'サラリー'],
   ['yearsRemaining', '残年数'],
-  ['tradeRestricted', 'トレード制限'],
+  ['tradeRestricted', 'TR制限'],
 ];
 
 function DraftPicksSection({ picks, season }: { picks: DraftPickEntry[]; season: string }) {
@@ -72,6 +72,37 @@ interface Props {
   data: NBAData;
 }
 
+interface PlayerStats { pts: number | null; reb: number | null; ast: number | null; stl: number | null; blk: number | null }
+
+async function fetchStatsBatch(
+  ids: string[], espnYear: number
+): Promise<Map<string, PlayerStats>> {
+  const ESPN_CORE = 'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba';
+  const results = new Map<string, PlayerStats>();
+  const CONCURRENCY = 8;
+  for (let i = 0; i < ids.length; i += CONCURRENCY) {
+    const batch = ids.slice(i, i + CONCURRENCY);
+    await Promise.all(batch.map(async id => {
+      try {
+        const r = await fetch(`${ESPN_CORE}/seasons/${espnYear}/types/2/athletes/${id}/statistics/0`);
+        if (!r.ok) return;
+        const d = await r.json();
+        const cats = (d.splits?.categories ?? []) as Array<{ stats: Array<{ name: string; value: number }> }>;
+        const stats: Record<string, number> = {};
+        for (const cat of cats) for (const s of cat.stats ?? []) stats[s.name] = s.value;
+        results.set(id, {
+          pts: stats.avgPoints ?? null,
+          reb: stats.avgRebounds ?? null,
+          ast: stats.avgAssists ?? null,
+          stl: stats.avgSteals ?? null,
+          blk: stats.avgBlocks ?? null,
+        });
+      } catch { /* ignore */ }
+    }));
+  }
+  return results;
+}
+
 function buildBadges(awards: NBAData['awards']): Map<string, string[]> {
   const map = new Map<string, string[]>();
   const add = (id: string | undefined, b: string) => {
@@ -98,6 +129,15 @@ export default function TeamDetail({ team: t, players, data }: Props) {
   const max = capScale(data.teams, data.thresholds.secondApron);
   const total = t.totalCap ?? t.rosterSalary;
   const awardBadges = buildBadges(data.awards);
+
+  const [playerStats, setPlayerStats] = useState<Map<string, PlayerStats>>(new Map());
+  const espnYear = Number(data.meta.season?.slice(0, 4) ?? 2025) + 1;
+
+  useEffect(() => {
+    const ids = players.map(p => p.id).filter(Boolean);
+    if (ids.length === 0) return;
+    fetchStatsBatch(ids, espnYear).then(setPlayerStats);
+  }, [players, espnYear]);
 
   const roster = [...players].sort((a, b) => {
     const isMissing = (p: Player) =>
@@ -177,6 +217,11 @@ export default function TeamDetail({ team: t, players, data }: Props) {
                       </button>
                     </th>
                   ))}
+                  <th className="stats-col">PTS</th>
+                  <th className="stats-col">REB</th>
+                  <th className="stats-col">AST</th>
+                  <th className="stats-col">STL</th>
+                  <th className="stats-col">BLK</th>
                 </tr>
               </thead>
               <tbody>
@@ -199,6 +244,11 @@ export default function TeamDetail({ team: t, players, data }: Props) {
                     <td><b>{yen(p.salary)}</b></td>
                     <td>{p.yearsRemaining ?? '—'}</td>
                     <td>{p.tradeRestricted ? 'あり' : '—'}</td>
+                    {(['pts','reb','ast','stl','blk'] as const).map(k => {
+                      const s = playerStats.get(p.id);
+                      const v = s?.[k];
+                      return <td key={k} className="stats-col">{v != null ? v.toFixed(1) : '—'}</td>;
+                    })}
                   </tr>
                 ))}
               </tbody>

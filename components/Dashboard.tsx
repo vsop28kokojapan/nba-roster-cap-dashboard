@@ -10,6 +10,8 @@ import RuleGuide from './RuleGuide';
 import ContractBadge from './ContractBadge';
 import HistoryPanel from './HistoryPanel';
 import AwardsPanel from './AwardsPanel';
+import Scoreboard from './Scoreboard';
+import StandingsHero from './StandingsHero';
 
 type Tab = 'teams' | 'players' | 'trades' | 'history' | 'awards';
 
@@ -332,17 +334,19 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
       </header>
 
       <main>
+        <Scoreboard />
+        {(data.standings?.length ?? 0) > 0 && <StandingsHero standings={data.standings[0]} />}
         <ThresholdCards thresholds={data.thresholds} />
         <RuleGuide thresholds={data.thresholds} />
 
         <nav className="tabs">
-          {(['teams', 'players', 'trades', 'history', 'awards'] as Tab[]).map(t => (
+          {(['teams', 'players', 'awards', 'history', 'trades'] as Tab[]).map(t => (
             <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
-              {t === 'teams' ? 'チーム'
+              {t === 'teams' ? 'チーム一覧'
                 : t === 'players' ? '選手'
-                : t === 'trades' ? 'トレード・異動'
-                : t === 'history' ? '履歴'
-                : 'アワード'}
+                : t === 'awards' ? '🏆 アワード'
+                : t === 'history' ? '📊 履歴'
+                : 'トレード・異動'}
             </button>
           ))}
         </nav>
