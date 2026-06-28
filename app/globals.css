@@ -82,6 +82,14 @@ main { max-width: 1440px; margin: auto; padding: 0 0 60px; }
 }
 .sb-card:hover { border-color: #4a7fa8; }
 .sb-card.in { border-color: #c8102e40; }
+.sb-card-clickable { cursor: pointer; }
+.sb-card-clickable:hover { border-color: #5a9abf; background: #162e48; }
+.sb-detail-hint { font-size: 9px; color: #4a7fa8; text-align: center; letter-spacing: .04em; margin-top: 2px; }
+/* Drawer game score (scoreboard context) */
+.drawer-game-score { font-size: 24px; font-weight: 900; color: #8aaec9; margin: 0 4px; }
+.drawer-score-win { color: #f5c518; }
+.drawer-team-winner { color: #f5c518; }
+.drawer-live-badge { background: #c8102e; color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; letter-spacing: .08em; }
 .sb-team { display: flex; align-items: center; gap: 5px; flex: 1; }
 .sb-team img { border-radius: 3px; }
 .sb-abbr { font-size: 12px; font-weight: 700; color: #c8d8e8; }
