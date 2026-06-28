@@ -44,6 +44,7 @@ export interface Player {
   contractType: ContractType;
   yearsWithTeam: number | null;
   teamJoinedSeason: string | null;
+  contractYears?: { year: number; salary: number }[];
 }
 
 export interface Transaction {

@@ -23,14 +23,156 @@ const LINE_LABELS: [string, keyof Thresholds][] = [
   ['第2エプロン', 'secondApron'],
 ];
 
-const COLUMNS: [SortKey, string][] = [
+const BASE_COLUMNS: [SortKey, string][] = [
   ['jersey', '#'],
   ['name', '選手'],
   ['position', 'POS'],
-  ['salary', 'サラリー'],
-  ['yearsRemaining', '残年数'],
-  ['tradeRestricted', 'TR制限'],
 ];
+
+function salaryTierClass(salary: number | null, cap: number | null): string {
+  if (!salary || !cap) return 'tier-min';
+  const pct = salary / cap;
+  if (pct >= 0.30) return 'tier-max';
+  if (pct >= 0.20) return 'tier-near';
+  if (pct >= 0.10) return 'tier-mid';
+  if (pct >= 0.035) return 'tier-low';
+  return 'tier-min';
+}
+
+function tierLabel(cls: string): string {
+  switch (cls) {
+    case 'tier-max':  return 'マックス';
+    case 'tier-near': return 'ニアマックス';
+    case 'tier-mid':  return 'ミドルレベル';
+    case 'tier-low':  return '小額';
+    default:          return 'ミニマム';
+  }
+}
+
+function yearLabel(year: number): string {
+  return `'${String(year - 1).slice(-2)}-${String(year).slice(-2)}`;
+}
+
+// ── Cap Projection Chart ───────────────────────────────────────────────────
+
+function SalaryProjectionChart({
+  players, thresholds, espnYear,
+}: {
+  players: Player[];
+  thresholds: Thresholds;
+  espnYear: number;
+}) {
+  const allYears = [...new Set(
+    players.flatMap(p => (p.contractYears ?? []).map(c => c.year))
+  )].filter(y => y >= espnYear).sort((a, b) => a - b);
+
+  if (allYears.length === 0) return null;
+  const years = allYears.slice(0, 5);
+
+  const totals = years.map(yr =>
+    players.reduce((sum, p) => {
+      const entry = (p.contractYears ?? []).find(c => c.year === yr);
+      return sum + (entry?.salary ?? 0);
+    }, 0)
+  );
+
+  const W = 800, H = 200;
+  const PAD = { top: 28, right: 20, bottom: 36, left: 72 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top - PAD.bottom;
+
+  const yMax = Math.max(...totals, thresholds.secondApron ?? 0, thresholds.salaryCap ?? 0) * 1.12;
+  const yScale = (v: number) => PAD.top + chartH - (v / yMax) * chartH;
+  const xStep = chartW / years.length;
+  const barW = xStep * 0.55;
+
+  const barColor = (total: number): string => {
+    if (total >= (thresholds.secondApron ?? Infinity)) return '#c8102e';
+    if (total >= (thresholds.firstApron ?? Infinity)) return '#e87722';
+    if (total >= (thresholds.luxuryTax ?? Infinity)) return '#f5c518';
+    if (total >= (thresholds.salaryCap ?? Infinity)) return '#3a7a5e';
+    return '#0a6fc2';
+  };
+
+  const thresholdLines: { label: string; value: number | null; color: string }[] = [
+    { label: 'キャップ', value: thresholds.salaryCap, color: '#3a7a5e' },
+    { label: '税', value: thresholds.luxuryTax, color: '#b5900a' },
+    { label: '1st', value: thresholds.firstApron, color: '#e87722' },
+    { label: '2nd', value: thresholds.secondApron, color: '#c8102e' },
+  ];
+
+  // Y-axis grid labels
+  const yTicks = [0, 0.25, 0.5, 0.75, 1.0].map(f => yMax * f);
+
+  return (
+    <div className="proj-chart-wrap">
+      <h3 className="proj-title">キャップ見込み推移</h3>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}>
+        {/* Y-axis grid */}
+        {yTicks.map((v, i) => {
+          const y = yScale(v);
+          return (
+            <g key={i}>
+              <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y}
+                stroke="#e8edf2" strokeWidth={i === 0 ? 1.5 : 1} />
+              <text x={PAD.left - 6} y={y + 4} textAnchor="end"
+                fontSize={9} fill="#9ab0c0">
+                {v > 0 ? `$${(v / 1e6).toFixed(0)}M` : ''}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Threshold lines */}
+        {thresholdLines.map(({ label, value, color }) => {
+          if (!value) return null;
+          const y = yScale(value);
+          if (y < PAD.top - 10 || y > PAD.top + chartH + 10) return null;
+          return (
+            <g key={label}>
+              <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y}
+                stroke={color} strokeWidth={1.5} strokeDasharray="5,3" opacity={0.85} />
+              <text x={PAD.left - 6} y={y + 4} textAnchor="end"
+                fontSize={9} fill={color} fontWeight={700}>{label}</text>
+            </g>
+          );
+        })}
+
+        {/* Bars */}
+        {years.map((yr, i) => {
+          const total = totals[i];
+          if (total === 0) return null;
+          const barH = (total / yMax) * chartH;
+          const cx = PAD.left + (i + 0.5) * xStep;
+          const x = cx - barW / 2;
+          const y = PAD.top + chartH - barH;
+          const color = barColor(total);
+          return (
+            <g key={yr}>
+              <rect x={x} y={y} width={barW} height={barH}
+                fill={color} opacity={0.8} rx={3} />
+              <text x={cx} y={y - 6} textAnchor="middle"
+                fontSize={11} fill={color} fontWeight={800}>
+                ${(total / 1e6).toFixed(0)}M
+              </text>
+              <text x={cx} y={H - 4} textAnchor="middle"
+                fontSize={10} fill="#6a7f90">
+                {yearLabel(yr)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <div className="proj-legend">
+        {thresholdLines.filter(l => l.value).map(({ label, color }) => (
+          <span key={label} style={{ color }}>— {label}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Draft picks ────────────────────────────────────────────────────────────
 
 function DraftPicksSection({ picks, season }: { picks: DraftPickEntry[]; season: string }) {
   if (picks.length === 0) return null;
@@ -66,11 +208,7 @@ function DraftPicksSection({ picks, season }: { picks: DraftPickEntry[]; season:
   );
 }
 
-interface Props {
-  team: Team;
-  players: Player[];
-  data: NBAData;
-}
+// ── Stats fetch ────────────────────────────────────────────────────────────
 
 interface PlayerStats { pts: number | null; reb: number | null; ast: number | null; stl: number | null; blk: number | null }
 
@@ -103,6 +241,8 @@ async function fetchStatsBatch(
   return results;
 }
 
+// ── Award badges ───────────────────────────────────────────────────────────
+
 function buildBadges(awards: NBAData['awards']): Map<string, { icon: string; label: string; season: string }[]> {
   const map = new Map<string, { icon: string; label: string; season: string }[]>();
   const add = (id: string | undefined, icon: string, label: string, season: string) => {
@@ -123,12 +263,22 @@ function buildBadges(awards: NBAData['awards']): Map<string, { icon: string; lab
   return map;
 }
 
+// ── Main component ─────────────────────────────────────────────────────────
+
+interface Props {
+  team: Team;
+  players: Player[];
+  data: NBAData;
+}
+
 export default function TeamDetail({ team: t, players, data }: Props) {
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: 'salary', dir: 'desc' });
+  const [multiYear, setMultiYear] = useState(false);
 
   const max = capScale(data.teams, data.thresholds.secondApron);
   const total = t.totalCap ?? t.rosterSalary;
   const awardBadges = buildBadges(data.awards);
+  const cap = data.thresholds.salaryCap;
 
   const [playerStats, setPlayerStats] = useState<Map<string, PlayerStats>>(new Map());
   const espnYear = Number(data.meta.season?.slice(0, 4) ?? 2025) + 1;
@@ -162,6 +312,11 @@ export default function TeamDetail({ team: t, players, data }: Props) {
 
   const sortMark = (key: SortKey) =>
     sort.key === key ? (sort.dir === 'asc' ? '▲' : '▼') : '↕';
+
+  // Determine contract years present across all players (for column headers)
+  const contractYearCols = [...new Set(
+    players.flatMap(p => (p.contractYears ?? []).map(c => c.year))
+  )].filter(y => y >= espnYear).sort((a, b) => a - b).slice(0, 5);
 
   return (
     <section className="team-page">
@@ -199,24 +354,70 @@ export default function TeamDetail({ team: t, players, data }: Props) {
           </div>
         </section>
 
+        {/* Cap Projection Chart */}
+        {contractYearCols.length > 0 && (
+          <SalaryProjectionChart
+            players={players}
+            thresholds={data.thresholds}
+            espnYear={espnYear}
+          />
+        )}
+
         <DraftPicksSection picks={data.draftPicks?.[t.abbreviation] ?? []} season={data.meta.season} />
+
+        {/* Salary tier legend */}
+        <div className="tier-legend">
+          <span className="tier-dot tier-max" />マックス (≥30% cap)
+          <span className="tier-dot tier-near" />ニアマックス (20-30%)
+          <span className="tier-dot tier-mid" />ミドル (10-20%)
+          <span className="tier-dot tier-low" />小額 (3.5-10%)
+          <span className="tier-dot tier-min" />ミニマム
+        </div>
 
         <section>
           <div className="detail-roster-title">
             <h3>ロスター／選手サラリー</h3>
-            <span>{roster.length}選手 · 見出しクリックで並べ替え</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span>{roster.length}選手 · 見出しクリックで並べ替え</span>
+              <button
+                className={`year-toggle-btn${multiYear ? ' active' : ''}`}
+                onClick={() => setMultiYear(v => !v)}
+              >
+                {multiYear ? '📅 複数年表示' : '📅 複数年表示'}
+              </button>
+            </div>
           </div>
           <div className="table-wrap">
             <table className="sortable-table">
               <thead>
                 <tr>
-                  {COLUMNS.map(([key, label]) => (
+                  {BASE_COLUMNS.map(([key, label]) => (
                     <th key={key}>
-                      <button onClick={() => toggleSort(key)}>
-                        {label} {sortMark(key)}
+                      <button onClick={() => toggleSort(key as SortKey)}>
+                        {label} {sortMark(key as SortKey)}
                       </button>
                     </th>
                   ))}
+                  {multiYear ? (
+                    // Multi-year: show each contract year as a column
+                    contractYearCols.map(yr => (
+                      <th key={yr} className="stats-col yr-col">
+                        {yearLabel(yr)}
+                      </th>
+                    ))
+                  ) : (
+                    <>
+                      <th>
+                        <button onClick={() => toggleSort('salary')}>サラリー {sortMark('salary')}</button>
+                      </th>
+                      <th>
+                        <button onClick={() => toggleSort('yearsRemaining')}>残年数 {sortMark('yearsRemaining')}</button>
+                      </th>
+                      <th>
+                        <button onClick={() => toggleSort('tradeRestricted')}>TR制限 {sortMark('tradeRestricted')}</button>
+                      </th>
+                    </>
+                  )}
                   <th className="stats-col">PTS</th>
                   <th className="stats-col">REB</th>
                   <th className="stats-col">AST</th>
@@ -225,35 +426,67 @@ export default function TeamDetail({ team: t, players, data }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {roster.map(p => (
-                  <tr key={p.id}>
-                    <td><b>{p.jersey}</b></td>
-                    <td>
-                      <div className="player">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        {p.headshot && <img src={p.headshot} alt={p.name} width={32} height={32} />}
-                        {p.profile
-                          ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
-                          : p.name}
-                        {(awardBadges.get(p.id) ?? []).map(b => (
-                          <span key={b.label + b.season} className="player-badge" title={b.season}>
-                            <span className="pb-icon">{b.icon}</span>
-                            <span className="pb-label">{b.label}</span>
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td>{p.position}</td>
-                    <td><b>{yen(p.salary)}</b></td>
-                    <td>{p.yearsRemaining ?? '—'}</td>
-                    <td>{p.tradeRestricted ? 'あり' : '—'}</td>
-                    {(['pts','reb','ast','stl','blk'] as const).map(k => {
-                      const s = playerStats.get(p.id);
-                      const v = s?.[k];
-                      return <td key={k} className="stats-col">{v != null ? v.toFixed(1) : '—'}</td>;
-                    })}
-                  </tr>
-                ))}
+                {roster.map(p => {
+                  const tier = salaryTierClass(p.salary, cap);
+                  return (
+                    <tr key={p.id} className={tier}>
+                      <td><b>{p.jersey}</b></td>
+                      <td>
+                        <div className="player">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          {p.headshot && <img src={p.headshot} alt={p.name} width={32} height={32} />}
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+                              {p.profile
+                                ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
+                                : p.name}
+                              {(awardBadges.get(p.id) ?? []).map(b => (
+                                <span key={b.label + b.season} className="player-badge" title={b.season}>
+                                  <span className="pb-icon">{b.icon}</span>
+                                  <span className="pb-label">{b.label}</span>
+                                </span>
+                              ))}
+                            </div>
+                            <span className="tier-label-inline">{tierLabel(tier)}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{p.position}</td>
+                      {multiYear ? (
+                        contractYearCols.map(yr => {
+                          const entry = (p.contractYears ?? []).find(c => c.year === yr);
+                          const isCurrentYr = yr === espnYear;
+                          return (
+                            <td key={yr} className={`yr-col${isCurrentYr ? ' yr-current' : ' yr-future'}`}>
+                              {entry?.salary ? (
+                                <b style={isCurrentYr ? {} : { color: '#6a7f90' }}>
+                                  {yen(entry.salary)}
+                                </b>
+                              ) : (
+                                <span className="yr-fa">FA</span>
+                              )}
+                            </td>
+                          );
+                        })
+                      ) : (
+                        <>
+                          <td>
+                            <span className={`sal-cell ${tier}`}>
+                              <b>{yen(p.salary)}</b>
+                            </span>
+                          </td>
+                          <td>{p.yearsRemaining != null ? p.yearsRemaining : '—'}</td>
+                          <td>{p.tradeRestricted ? 'あり' : '—'}</td>
+                        </>
+                      )}
+                      {(['pts','reb','ast','stl','blk'] as const).map(k => {
+                        const s = playerStats.get(p.id);
+                        const v = s?.[k];
+                        return <td key={k} className="stats-col">{v != null ? v.toFixed(1) : '—'}</td>;
+                      })}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
