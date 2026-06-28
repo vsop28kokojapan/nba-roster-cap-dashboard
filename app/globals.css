@@ -943,6 +943,24 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
 .cup-matchup { display: flex; flex-direction: column; gap: 4px; }
 .cup-round-label { font-size: 9px; color: #8a9daf; text-transform: uppercase; letter-spacing: .08em; }
 .cup-note-sub { font-size: 11px; color: #9aadbe; font-style: italic; }
+
+/* Cup group stage table */
+.cup-group-section { margin: 20px 0; }
+.cup-group-tables { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 720px) { .cup-group-tables { grid-template-columns: 1fr; } }
+.cup-group-conf-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #5a7a9a; margin: 0 0 8px; }
+.cup-group-table { width: 100%; border-collapse: collapse; }
+.cup-group-table th { font-size: 10px; color: #9aadbe; text-transform: uppercase; letter-spacing: .06em; padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--line); }
+.cup-group-table td { padding: 5px 8px; font-size: 13px; border-bottom: 1px solid #f0f4f8; }
+.cup-group-table tr.cgt-advanced td { background: #f0fdf4; }
+.cup-group-table tr.cgt-advanced td:first-child { border-left: 3px solid #16a34a; }
+.cgt-team-link { display: flex; align-items: center; gap: 6px; text-decoration: none; color: inherit; }
+.cgt-adv-badge { font-size: 9px; background: #16a34a; color: white; border-radius: 4px; padding: 1px 4px; font-weight: 700; margin-left: 2px; }
+.cgt-num { text-align: right; font-variant-numeric: tabular-nums; min-width: 30px; }
+.cgt-w { font-weight: 700; color: #15803d; }
+.cgt-l { color: #9aadbe; }
+.cup-group-note { font-size: 11px; color: #9aadbe; font-style: italic; margin: 8px 0 0; }
+
 .bracket-disclaimer { font-size: 11px; color: #9aadbe; margin-top: 20px; font-style: italic; }
 
 .sth-team-cell { display: flex; align-items: center; gap: 7px; text-decoration: none; color: inherit; }
