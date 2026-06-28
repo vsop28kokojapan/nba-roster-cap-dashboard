@@ -58,7 +58,7 @@ function yearLabel(year: number): string {
 interface TeamHistoryPoint { season: string; totalCap: number | null; rosterSalary: number }
 
 function HistoryMiniChart({ abbr }: { abbr: string }) {
-  const [points, setPoints] = useState<TeamHistoryPoint[]>([]);
+  const [points, setPoints] = useState<TeamHistoryPoint[] | null>(null); // null = loading
 
   useEffect(() => {
     fetch('/api/history')
@@ -74,10 +74,22 @@ function HistoryMiniChart({ abbr }: { abbr: string }) {
           .slice(-5);
         setPoints(data);
       })
-      .catch(() => {});
+      .catch(() => setPoints([]));
   }, [abbr]);
 
-  if (points.length === 0) return null;
+  if (points === null) return (
+    <div className="history-mini-card">
+      <p className="history-mini-title">過去サラリー推移</p>
+      <p className="history-mini-empty">読み込み中…</p>
+    </div>
+  );
+
+  if (points.length === 0) return (
+    <div className="history-mini-card">
+      <p className="history-mini-title">過去サラリー推移</p>
+      <p className="history-mini-empty">履歴データ未取得<br /><span>履歴更新後に表示</span></p>
+    </div>
+  );
 
   const vals = points.map(p => p.totalCap ?? p.rosterSalary ?? 0).filter(v => v > 0);
   const maxVal = Math.max(...vals) * 1.05;
@@ -142,7 +154,12 @@ function SalaryProjectionChart({
     players.flatMap(p => (p.contractYears ?? []).map(c => c.year))
   )].filter(y => y >= espnYear).sort((a, b) => a - b);
 
-  if (allYears.length === 0) return null;
+  if (allYears.length === 0) return (
+    <div className="proj-chart-wrap">
+      <h3 className="proj-title">キャップ見込み推移</h3>
+      <p className="proj-empty">「データを更新」後に複数年サラリーが表示されます</p>
+    </div>
+  );
   const years = allYears.slice(0, 5);
 
   const totals = years.map(yr =>
@@ -520,9 +537,10 @@ export default function TeamDetail({ team: t, players, data }: Props) {
                                 ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
                                 : p.name}
                               {(awardBadges.get(p.id) ?? []).map(b => (
-                                <span key={b.label + b.season} className="player-badge" title={b.season}>
+                                <span key={b.label + b.season} className="player-badge">
                                   <span className="pb-icon">{b.icon}</span>
                                   <span className="pb-label">{b.label}</span>
+                                  <span className="pb-season">{b.season.slice(2)}</span>
                                 </span>
                               ))}
                             </div>

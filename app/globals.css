@@ -118,34 +118,45 @@ main { max-width: 1440px; margin: auto; padding: 0 0 60px; }
 .seed-dot.playin  { background: var(--gold); }
 .seed-dot.inline  { display: inline-block; }
 .sth-both {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
 }
-@media (max-width: 900px) { .sth-both { grid-template-columns: 1fr; } }
+.sth-conf { overflow-x: auto; }
+.sth-conf:first-child { border-right: 1px solid var(--line); padding-right: 12px; }
+.sth-conf:last-child { padding-left: 12px; }
+@media (max-width: 900px) {
+  .sth-both { grid-template-columns: 1fr; }
+  .sth-conf:first-child { border-right: none; padding-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 8px; }
+  .sth-conf:last-child { padding-left: 0; }
+}
 .sth-conf-title {
   font-size: 11px; font-weight: 800; color: #7a8fa0;
   text-transform: uppercase; letter-spacing: .1em; margin: 0 0 6px;
 }
 .sth-table {
-  width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed;
+  width: 100%; border-collapse: collapse; font-size: 12px;
 }
-.sth-table colgroup { display: table-column-group; }
 .sth-table th {
-  background: #f4f7fb; padding: 5px 6px; text-align: left;
+  background: #f4f7fb; padding: 5px 8px; text-align: left;
   font-size: 9px; color: #8a9daf; letter-spacing: .06em; text-transform: uppercase;
-  border-bottom: 2px solid var(--line); white-space: nowrap; overflow: hidden;
+  border-bottom: 2px solid var(--line); white-space: nowrap;
 }
-.sth-table td { padding: 5px 6px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; }
+.sth-table td { padding: 5px 8px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; white-space: nowrap; }
 .sth-table tr:last-child td { border-bottom: none; }
 .sth-table tr.playoff td { background: #f0faf4; }
 .sth-table tr.playin td { border-left: 3px solid var(--gold); }
-.sth-rank { width: 28px; color: #9ab0c0; font-size: 11px; white-space: nowrap; text-align: center; }
-.sth-col-w, .sth-col-l, .sth-col-pct { width: 34px; }
-.sth-col-team { min-width: 0; overflow: hidden; }
-.sth-team-cell { display: flex; align-items: center; gap: 5px; text-decoration: none; color: inherit; min-width: 0; }
-.sth-abbr { font-weight: 800; font-size: 12px; white-space: nowrap; }
-.sth-name { color: #6e7f90; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: none; }
+/* # column */
+.sth-rank { width: 26px; color: #9ab0c0; font-size: 11px; text-align: center; padding: 5px 4px !important; }
+/* チーム column - flexible */
+.sth-col-team { max-width: 160px; }
+/* Stats columns - compact, left-aligned */
+.sth-col-w, .sth-col-l { width: 36px; text-align: left; padding-left: 10px !important; }
+.sth-col-pct { width: 44px; text-align: left; padding-left: 6px !important; }
+.sth-table th.sth-col-w, .sth-table th.sth-col-l, .sth-table th.sth-col-pct { text-align: left; }
+.sth-team-cell { display: flex; align-items: center; gap: 5px; text-decoration: none; color: inherit; }
+.sth-abbr { font-weight: 800; font-size: 12px; }
+.sth-name { display: none; }
 .sth-losses { color: #8a9daf; }
-.sth-pct { color: #5a7088; font-size: 11px; text-align: right; }
+.sth-pct { color: #5a7088; font-size: 11px; }
 
 /* ── threshold cards ── */
 .thresholds { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px max(24px, calc((100vw - 1440px) / 2)) 4px; }
@@ -509,6 +520,9 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
   padding: 12px 14px; min-width: 200px; max-width: 240px; flex-shrink: 0;
 }
 .history-mini-title { font-size: 10px; font-weight: 700; color: #6a8fa8; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 6px; }
+.history-mini-empty { font-size: 11px; color: #9ab0c0; margin: 8px 0 0; line-height: 1.5; }
+.history-mini-empty span { font-size: 10px; }
+.proj-empty { font-size: 12px; color: #9ab0c0; text-align: center; padding: 20px 0 8px; margin: 0; }
 .detail-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .detail-metrics > div {
   border: 1px solid var(--line);
@@ -949,6 +963,7 @@ th.yr-col { font-size: 10px; color: #8a9daf; text-transform: uppercase; letter-s
 }
 .pb-icon { font-size: 11px; line-height: 1; }
 .pb-label { color: #3a5a7a; letter-spacing: .02em; }
+.pb-season { color: #8aabcf; font-size: 9px; font-weight: 600; margin-left: 1px; }
 
 /* ── Awards panel ── */
 .awards-panel { padding: 8px 0; }

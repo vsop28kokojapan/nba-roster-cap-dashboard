@@ -169,9 +169,10 @@ function PlayerTable({ players, awards }: { players: Player[]; awards: NBAData['
                     ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
                     : p.name}
                   {(badges.get(p.id) ?? []).map(b => (
-                    <span key={b.label + b.season} className="player-badge" title={b.season}>
+                    <span key={b.label + b.season} className="player-badge">
                       <span className="pb-icon">{b.icon}</span>
                       <span className="pb-label">{b.label}</span>
+                      <span className="pb-season">{b.season.slice(2)}</span>
                     </span>
                   ))}
                 </div>
