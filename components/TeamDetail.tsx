@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { NBAData, Player, Team, Thresholds, DraftPickEntry } from '@/lib/types';
+import { NBAData, Player, Team, Thresholds, DraftPickEntry, HistoricalSnapshot } from '@/lib/types';
 import { yen, badgeClass, lineDifference, capScale } from '@/lib/utils';
 import CapTrack from './CapTrack';
 
@@ -51,6 +51,82 @@ function tierLabel(cls: string): string {
 
 function yearLabel(year: number): string {
   return `'${String(year - 1).slice(-2)}-${String(year).slice(-2)}`;
+}
+
+// ── Historical salary mini chart ──────────────────────────────────────────
+
+interface TeamHistoryPoint { season: string; totalCap: number | null; rosterSalary: number }
+
+function HistoryMiniChart({ abbr }: { abbr: string }) {
+  const [points, setPoints] = useState<TeamHistoryPoint[]>([]);
+
+  useEffect(() => {
+    fetch('/api/history')
+      .then(r => r.json())
+      .then((snaps: HistoricalSnapshot[]) => {
+        const data = snaps
+          .map(s => {
+            const t = s.teams.find(tm => tm.abbreviation === abbr);
+            return t ? { season: s.season, totalCap: t.totalCap, rosterSalary: t.rosterSalary } : null;
+          })
+          .filter((x): x is TeamHistoryPoint => x !== null)
+          .sort((a, b) => a.season.localeCompare(b.season))
+          .slice(-5);
+        setPoints(data);
+      })
+      .catch(() => {});
+  }, [abbr]);
+
+  if (points.length === 0) return null;
+
+  const vals = points.map(p => p.totalCap ?? p.rosterSalary ?? 0).filter(v => v > 0);
+  const maxVal = Math.max(...vals) * 1.05;
+  const minVal = Math.min(...vals) * 0.92;
+  const range = maxVal - minVal || 1;
+
+  const W = 220, H = 72;
+  const PAD = { left: 4, right: 4, top: 18, bottom: 22 };
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top - PAD.bottom;
+  const n = points.length;
+  const xs = points.map((_, i) => PAD.left + (i / Math.max(n - 1, 1)) * cW);
+  const ys = points.map(p => {
+    const v = (p.totalCap ?? p.rosterSalary ?? 0);
+    return PAD.top + cH - ((v - minVal) / range) * cH;
+  });
+  const polyline = xs.map((x, i) => `${x},${ys[i]}`).join(' ');
+
+  return (
+    <div className="history-mini-card">
+      <p className="history-mini-title">過去サラリー推移</p>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}>
+        {/* Area fill */}
+        <defs>
+          <linearGradient id="hmg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#0a6fc2" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#0a6fc2" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <polygon
+          points={`${xs[0]},${PAD.top + cH} ${polyline} ${xs[n-1]},${PAD.top + cH}`}
+          fill="url(#hmg)"
+        />
+        <polyline points={polyline} fill="none" stroke="#0a6fc2" strokeWidth={1.8} strokeLinejoin="round" />
+        {/* Dots + labels */}
+        {points.map((p, i) => (
+          <g key={p.season}>
+            <circle cx={xs[i]} cy={ys[i]} r={3} fill="#0a6fc2" />
+            <text x={xs[i]} y={ys[i] - 5} textAnchor="middle" fontSize={8} fill="#0a6fc2" fontWeight={700}>
+              ${((p.totalCap ?? p.rosterSalary ?? 0) / 1e6).toFixed(0)}M
+            </text>
+            <text x={xs[i]} y={H - 4} textAnchor="middle" fontSize={8} fill="#8aabcf">
+              {p.season.replace(/20(\d{2})-(\d{2})/, "'$1-$2")}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
 }
 
 // ── Cap Projection Chart ───────────────────────────────────────────────────
@@ -324,14 +400,17 @@ export default function TeamDetail({ team: t, players, data }: Props) {
         <Link className="back-link" href="/">← 全チーム一覧へ戻る</Link>
 
         <div className="detail-head">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={t.logo} alt={t.name} width={78} height={78} />
-          <div>
-            <p className="eyebrow dark">TEAM CAP DETAIL</p>
-            <h2>{t.name}</h2>
-            <span className={`badge ${badgeClass(t.apronStatus)}`}>{t.apronStatus}</span>
-            {t.coach && <p className="coach-label">HC: {t.coach}</p>}
+          <div className="detail-head-left">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={t.logo} alt={t.name} width={78} height={78} />
+            <div>
+              <p className="eyebrow dark">TEAM CAP DETAIL</p>
+              <h2>{t.name}</h2>
+              <span className={`badge ${badgeClass(t.apronStatus)}`}>{t.apronStatus}</span>
+              {t.coach && <p className="coach-label">HC: {t.coach}</p>}
+            </div>
           </div>
+          <HistoryMiniChart abbr={t.abbreviation} />
         </div>
 
         <div className="detail-metrics">
