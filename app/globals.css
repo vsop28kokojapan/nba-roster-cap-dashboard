@@ -839,6 +839,7 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
 }
 .bt-winner .bt-abbr { color: #15803d; }
 .bt-winner .bt-seed { color: #4ade80; }
+.bt-winner .bt-rec { color: #16a34a; }
 .bt-loser {
   background: #fafafa; opacity: 0.52; filter: grayscale(25%);
 }

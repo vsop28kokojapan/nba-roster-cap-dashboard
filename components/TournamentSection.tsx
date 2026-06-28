@@ -10,24 +10,21 @@ type SeriesResult = 'winner' | 'loser';
 const R1_SEEDS: [number, number][] = [[1,8],[4,5],[3,6],[2,7]];
 
 async function fetchSeriesMap(season: string): Promise<Map<string, SeriesResult>> {
-  const year = parseInt(season.split('-')[0]) + 1; // 2025-26 → 2026
   try {
-    const r = await fetch(
-      `https://site.api.espn.com/apis/v2/sports/basketball/nba/playoff?season=${year}`,
-      { cache: 'no-store' }
-    );
-    const data = await r.json();
+    const r = await fetch(`/api/playoffs?season=${encodeURIComponent(season)}`, { cache: 'no-store' });
+    const { seriesWinners, seriesLosers } = await r.json() as {
+      seriesWinners: string[];
+      seriesLosers: string[];
+    };
     const map = new Map<string, SeriesResult>();
-    const seriesList: Array<{ competitors?: Array<{ abbreviation: string; winner: boolean }> }> =
-      data.bracket?.series ?? data.series ?? [];
-    for (const s of seriesList) {
-      const comps = s.competitors ?? [];
-      const hasWinner = comps.some(c => c.winner === true);
-      for (const c of comps) {
-        if (!c.abbreviation) continue;
-        if (c.winner === true) map.set(c.abbreviation, 'winner');
-        else if (hasWinner) map.set(c.abbreviation, 'loser');
-      }
+    // R1 loser = eliminated in first round (lost a series, never won one)
+    const wSet = new Set(seriesWinners);
+    for (const abbr of seriesLosers) {
+      if (!wSet.has(abbr)) map.set(abbr, 'loser');
+    }
+    // Won at least one series = show as winner in R1 slot
+    for (const abbr of seriesWinners) {
+      map.set(abbr, 'winner');
     }
     return map;
   } catch {
