@@ -590,13 +590,39 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
 @media (max-width: 620px) {
   header { align-items: start; flex-direction: column; }
   main { padding: 18px 14px; }
-  .team-grid { grid-template-columns: 1fr; }
   .toolbar { grid-template-columns: 1fr; }
   .thresholds { grid-template-columns: 1fr 1fr; }
   .rule-grid { grid-template-columns: 1fr; }
   .rule { min-height: auto; }
   .rule-guide, .cap-comparison { padding: 15px; }
   .cap-row { grid-template-columns: 52px minmax(170px, 1fr) 55px; }
+  /* チーム一覧：コンパクトリスト表示 */
+  .team-grid {
+    display: flex; flex-direction: column; gap: 0;
+    margin: 0 -14px; background: white;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .team-card {
+    display: flex; flex-direction: row; align-items: center;
+    gap: 12px; padding: 12px 16px; border-radius: 0;
+    border: none; border-bottom: 1px solid var(--line);
+    box-shadow: none; transform: none !important;
+  }
+  .team-card:last-child { border-bottom: none; }
+  .team-card .team-head { flex: 1; min-width: 0; }
+  .team-card .team-head img { width: 34px; height: 34px; }
+  .team-card .team-head h2 { font-size: 14px; margin: 0; }
+  .team-card .team-head span { font-size: 10px; }
+  .team-card .money,
+  .team-card .sub,
+  .team-card .distance,
+  .team-card .cap-track { display: none; }
+  .team-card .badge { font-size: 9px; padding: 2px 6px; flex-shrink: 0; }
+  .team-card .open-detail {
+    margin: 0; font-size: 18px; color: #b0bec9;
+    display: flex; align-items: center;
+  }
+  .cap-comparison { display: none; }
   .cap-chart { max-height: 480px; }
   .section-heading h2 { font-size: 20px; }
   .trade { grid-template-columns: 90px 1fr; }
@@ -805,6 +831,30 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
 .bt-seed { font-size: 11px; color: #8aaec9; font-weight: 700; width: 16px; }
 .bt-abbr { font-weight: 800; font-size: 13px; flex: 1; }
 .bt-rec { font-size: 11px; color: #8a9daf; margin-left: auto; }
+.bt-crown { font-size: 11px; color: #16a34a; font-weight: 800; margin-left: 2px; }
+/* Winner / Loser coloring */
+.bt-winner {
+  background: #f0fdf4; border-color: #16a34a !important;
+  box-shadow: 0 0 0 1px #16a34a20;
+}
+.bt-winner .bt-abbr { color: #15803d; }
+.bt-winner .bt-seed { color: #4ade80; }
+.bt-loser {
+  background: #fafafa; opacity: 0.52; filter: grayscale(25%);
+}
+.bt-loser .bt-abbr { color: #8a9daf; }
+/* Legend */
+.bracket-live-badge {
+  font-size: 10px; font-weight: 700; color: #16a34a;
+  background: #f0fdf4; border: 1px solid #bbf7d0;
+  border-radius: 20px; padding: 2px 8px;
+}
+.bracket-legend {
+  display: flex; gap: 14px; margin: 10px 0 4px; font-size: 11px;
+}
+.bl-item { display: flex; align-items: center; gap: 4px; font-weight: 700; }
+.bl-win { color: #16a34a; }
+.bl-lose { color: #8a9daf; }
 
 /* Matchup card */
 .bracket-matchup {

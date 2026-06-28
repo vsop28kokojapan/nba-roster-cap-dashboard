@@ -1,49 +1,92 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { SeasonStandings, SeasonAwards, StandingEntry } from '@/lib/types';
 
 type BracketTab = 'cup' | 'playin' | 'playoffs';
+type SeriesResult = 'winner' | 'loser';
 
 // Seed matchups: 1v8, 2v7, 3v6, 4v5
 const R1_SEEDS: [number, number][] = [[1,8],[4,5],[3,6],[2,7]];
 
-function TeamPill({ entry, showRecord = true }: { entry: StandingEntry; showRecord?: boolean }) {
+async function fetchSeriesMap(season: string): Promise<Map<string, SeriesResult>> {
+  const year = parseInt(season.split('-')[0]) + 1; // 2025-26 → 2026
+  try {
+    const r = await fetch(
+      `https://site.api.espn.com/apis/v2/sports/basketball/nba/playoff?season=${year}`,
+      { cache: 'no-store' }
+    );
+    const data = await r.json();
+    const map = new Map<string, SeriesResult>();
+    const seriesList: Array<{ competitors?: Array<{ abbreviation: string; winner: boolean }> }> =
+      data.bracket?.series ?? data.series ?? [];
+    for (const s of seriesList) {
+      const comps = s.competitors ?? [];
+      const hasWinner = comps.some(c => c.winner === true);
+      for (const c of comps) {
+        if (!c.abbreviation) continue;
+        if (c.winner === true) map.set(c.abbreviation, 'winner');
+        else if (hasWinner) map.set(c.abbreviation, 'loser');
+      }
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+function TeamPill({
+  entry, showRecord = true, result,
+}: {
+  entry: StandingEntry; showRecord?: boolean; result?: SeriesResult;
+}) {
+  const cls = result === 'winner' ? ' bt-winner' : result === 'loser' ? ' bt-loser' : '';
   return (
-    <Link href={`/team/${entry.abbr}`} className="bracket-team">
+    <Link href={`/team/${entry.abbr}`} className={`bracket-team${cls}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {entry.logo && <img src={entry.logo} alt={entry.abbr} width={20} height={20} />}
       <span className="bt-seed">{entry.rank}</span>
       <span className="bt-abbr">{entry.abbr}</span>
+      {result === 'winner' && <span className="bt-crown">✓</span>}
       {showRecord && <span className="bt-rec">{entry.wins}-{entry.losses}</span>}
     </Link>
   );
 }
 
 function MatchupCard({
-  top, bot, label,
+  top, bot, label, sm,
 }: {
   top: StandingEntry | null; bot: StandingEntry | null; label?: string;
+  sm?: Map<string, SeriesResult>;
 }) {
   return (
     <div className="bracket-matchup">
       {label && <span className="bracket-matchup-label">{label}</span>}
-      {top ? <TeamPill entry={top} /> : <div className="bracket-team placeholder">TBD</div>}
+      {top
+        ? <TeamPill entry={top} result={sm?.get(top.abbr)} />
+        : <div className="bracket-team placeholder">TBD</div>}
       <div className="bracket-vs">vs</div>
-      {bot ? <TeamPill entry={bot} /> : <div className="bracket-team placeholder">TBD</div>}
+      {bot
+        ? <TeamPill entry={bot} result={sm?.get(bot.abbr)} />
+        : <div className="bracket-team placeholder">TBD</div>}
     </div>
   );
 }
 
-function PlayInSection({ east, west }: { east: StandingEntry[]; west: StandingEntry[] }) {
+function PlayInSection({
+  east, west, sm,
+}: {
+  east: StandingEntry[]; west: StandingEntry[];
+  sm?: Map<string, SeriesResult>;
+}) {
   const render = (entries: StandingEntry[], conf: string) => {
     const s = (n: number) => entries.find(e => e.rank === n) ?? null;
     return (
       <div className="playin-conf">
         <h4 className="bracket-conf-title">{conf}</h4>
         <div className="playin-grid">
-          <MatchupCard top={s(7)} bot={s(8)} label="勝利チームが7位シード確定" />
-          <MatchupCard top={s(9)} bot={s(10)} label="敗者は敗退" />
+          <MatchupCard top={s(7)} bot={s(8)} label="勝利チームが7位シード確定" sm={sm} />
+          <MatchupCard top={s(9)} bot={s(10)} label="敗者は敗退" sm={sm} />
         </div>
         <p className="playin-note">
           7-8戦の敗者 vs 9-10戦の勝者 → 最後の8位シードを争う
@@ -59,7 +102,12 @@ function PlayInSection({ east, west }: { east: StandingEntry[]; west: StandingEn
   );
 }
 
-function PlayoffBracket({ east, west }: { east: StandingEntry[]; west: StandingEntry[] }) {
+function PlayoffBracket({
+  east, west, sm,
+}: {
+  east: StandingEntry[]; west: StandingEntry[];
+  sm?: Map<string, SeriesResult>;
+}) {
   const s = (entries: StandingEntry[], n: number) => entries.find(e => e.rank === n) ?? null;
   return (
     <div className="playoff-bracket-wrap">
@@ -73,17 +121,17 @@ function PlayoffBracket({ east, west }: { east: StandingEntry[]; west: StandingE
               <div className="playoff-round">
                 <p className="round-label">1回戦</p>
                 {R1_SEEDS.map(([a, b]) => (
-                  <MatchupCard key={`${a}v${b}`} top={s(entries, a)} bot={s(entries, b)} />
+                  <MatchupCard key={`${a}v${b}`} top={s(entries, a)} bot={s(entries, b)} sm={sm} />
                 ))}
               </div>
               <div className="playoff-round">
                 <p className="round-label">準決勝</p>
-                <MatchupCard top={null} bot={null} />
-                <MatchupCard top={null} bot={null} />
+                <MatchupCard top={null} bot={null} sm={sm} />
+                <MatchupCard top={null} bot={null} sm={sm} />
               </div>
               <div className="playoff-round">
                 <p className="round-label">カンファレンス決勝</p>
-                <MatchupCard top={null} bot={null} />
+                <MatchupCard top={null} bot={null} sm={sm} />
               </div>
             </div>
           </div>
@@ -91,7 +139,7 @@ function PlayoffBracket({ east, west }: { east: StandingEntry[]; west: StandingE
       })}
       <div className="playoff-finals">
         <p className="round-label finals-label">🏆 NBAファイナル</p>
-        <MatchupCard top={null} bot={null} />
+        <MatchupCard top={null} bot={null} sm={sm} />
         <p className="finals-note">イースト代表 vs ウェスト代表</p>
       </div>
     </div>
@@ -134,14 +182,27 @@ export default function TournamentSection({
   awards: SeasonAwards | undefined;
 }) {
   const [tab, setTab] = useState<BracketTab>('playoffs');
+  const [sm, setSm] = useState<Map<string, SeriesResult>>(new Map());
+
+  useEffect(() => {
+    if (!standings?.season) return;
+    fetchSeriesMap(standings.season).then(setSm);
+  }, [standings?.season]);
 
   if (!standings) return null;
+
+  const hasResults = sm.size > 0;
 
   return (
     <section className="tournament-section">
       <div className="tournament-header">
         <h2 className="tournament-title">トーナメント</h2>
-        <p className="tournament-season">{standings.season}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <p className="tournament-season">{standings.season}</p>
+          {hasResults && (
+            <span className="bracket-live-badge">結果反映済</span>
+          )}
+        </div>
       </div>
       <div className="tournament-tabs">
         {([['playoffs', 'プレーオフ'], ['playin', 'プレーイン'], ['cup', 'NBAカップ']] as [BracketTab, string][]).map(([id, label]) => (
@@ -156,9 +217,15 @@ export default function TournamentSection({
       </div>
 
       {tab === 'cup' && <NbaCupSection awards={awards} />}
-      {tab === 'playin' && <PlayInSection east={standings.east} west={standings.west} />}
-      {tab === 'playoffs' && <PlayoffBracket east={standings.east} west={standings.west} />}
+      {tab === 'playin' && <PlayInSection east={standings.east} west={standings.west} sm={sm} />}
+      {tab === 'playoffs' && <PlayoffBracket east={standings.east} west={standings.west} sm={sm} />}
 
+      {hasResults && (
+        <div className="bracket-legend">
+          <span className="bl-item bl-win">✓ 勝者</span>
+          <span className="bl-item bl-lose">● 敗退</span>
+        </div>
+      )}
       <p className="bracket-disclaimer">
         ※ブラケットは順位表のシードから構成。実際の対戦結果はシーズン終了後のデータ更新で反映されます。
       </p>
