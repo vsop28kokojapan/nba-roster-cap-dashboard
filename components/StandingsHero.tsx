@@ -6,6 +6,13 @@ function ConfTable({ entries, label }: { entries: StandingEntry[]; label: string
     <div className="sth-conf">
       <h3 className="sth-conf-title">{label}</h3>
       <table className="sth-table">
+        <colgroup>
+          <col style={{ width: 26 }} />
+          <col style={{ width: 90 }} />
+          <col style={{ width: 36 }} />
+          <col style={{ width: 36 }} />
+          <col style={{ width: 46 }} />
+        </colgroup>
         <thead>
           <tr>
             <th className="sth-rank">#</th>

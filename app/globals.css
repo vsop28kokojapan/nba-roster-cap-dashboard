@@ -133,27 +133,24 @@ main { max-width: 1440px; margin: auto; padding: 0 0 60px; }
   text-transform: uppercase; letter-spacing: .1em; margin: 0 0 6px;
 }
 .sth-table {
-  width: 100%; border-collapse: collapse; font-size: 12px;
+  width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed;
 }
 .sth-table th {
-  background: #f4f7fb; padding: 5px 8px; text-align: left;
+  background: #f4f7fb; padding: 5px 4px; text-align: left;
   font-size: 9px; color: #8a9daf; letter-spacing: .06em; text-transform: uppercase;
-  border-bottom: 2px solid var(--line); white-space: nowrap;
+  border-bottom: 2px solid var(--line); overflow: hidden;
 }
-.sth-table td { padding: 5px 8px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; white-space: nowrap; }
+.sth-table td { padding: 5px 4px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; overflow: hidden; }
 .sth-table tr:last-child td { border-bottom: none; }
 .sth-table tr.playoff td { background: #f0faf4; }
 .sth-table tr.playin td { border-left: 3px solid var(--gold); }
 /* # column */
-.sth-rank { width: 26px; color: #9ab0c0; font-size: 11px; text-align: center; padding: 5px 4px !important; }
-/* チーム column - flexible */
-.sth-col-team { max-width: 160px; }
-/* Stats columns - compact, left-aligned */
-.sth-col-w, .sth-col-l { width: 36px; text-align: left; padding-left: 10px !important; }
-.sth-col-pct { width: 44px; text-align: left; padding-left: 6px !important; }
-.sth-table th.sth-col-w, .sth-table th.sth-col-l, .sth-table th.sth-col-pct { text-align: left; }
-.sth-team-cell { display: flex; align-items: center; gap: 5px; text-decoration: none; color: inherit; }
-.sth-abbr { font-weight: 800; font-size: 12px; }
+.sth-rank { color: #9ab0c0; font-size: 11px; text-align: center; }
+/* Stats columns — left-aligned */
+.sth-col-w, .sth-col-l { text-align: left; }
+.sth-col-pct { text-align: left; }
+.sth-team-cell { display: flex; align-items: center; gap: 4px; text-decoration: none; color: inherit; overflow: hidden; }
+.sth-abbr { font-weight: 800; font-size: 12px; white-space: nowrap; }
 .sth-name { display: none; }
 .sth-losses { color: #8a9daf; }
 .sth-pct { color: #5a7088; font-size: 11px; }
