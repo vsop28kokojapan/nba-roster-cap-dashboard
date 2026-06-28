@@ -398,20 +398,26 @@ async function fetchSeasonStandings(year: number): Promise<SeasonStandings> {
     const data = await get(`https://site.api.espn.com/apis/v2/sports/basketball/nba/standings?season=${year}`);
     const parseConf = (conf: Record<string, unknown>): StandingEntry[] => {
       const entries = ((conf.standings as Record<string, unknown>)?.entries as Record<string, unknown>[]) ?? [];
-      return entries.map((e, idx) => {
+      const parsed = entries.map((e) => {
         const team = e.team as Record<string, unknown>;
-        const statsArr = (e.stats as Array<{ name: string; displayValue: string }>) ?? [];
-        const stats: Record<string, string> = Object.fromEntries(statsArr.map(s => [s.name, s.displayValue]));
+        const statsArr = (e.stats as Array<{ name: string; value?: number; displayValue?: string }>) ?? [];
+        const statsNum: Record<string, number> = {};
+        const statsStr: Record<string, string> = {};
+        for (const s of statsArr) {
+          if (s.name && s.value !== undefined) statsNum[s.name] = s.value;
+          if (s.name && s.displayValue !== undefined) statsStr[s.name] = s.displayValue;
+        }
         const logos = team.logos as Array<{ rel?: string[]; href: string }> | undefined;
         return {
-          rank: idx + 1,
+          rank: Math.round(statsNum.playoffSeed ?? 99),
           abbr: String(team.abbreviation ?? ''),
           name: String(team.displayName ?? ''),
-          wins: Number(stats.wins ?? 0),
-          losses: Number(stats.losses ?? 0),
+          wins: Math.round(statsNum.wins ?? 0),
+          losses: Math.round(statsNum.losses ?? 0),
           logo: logos?.find(l => l.rel?.includes('default'))?.href ?? '',
         };
       });
+      return parsed.sort((a, b) => a.rank - b.rank);
     };
     const [east, west] = (data.children as Record<string, unknown>[]) ?? [];
     return { season, east: east ? parseConf(east) : [], west: west ? parseConf(west) : [] };

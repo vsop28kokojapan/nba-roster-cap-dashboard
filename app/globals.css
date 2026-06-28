@@ -95,7 +95,8 @@ main { max-width: 1440px; margin: auto; padding: 0 0 60px; }
 .standings-hero {
   background: white;
   border-bottom: 1px solid var(--line);
-  padding: 24px max(24px, calc((100vw - 1440px) / 2));
+  padding: 24px 28px;
+  overflow-x: auto;
 }
 .sth-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -111,9 +112,9 @@ main { max-width: 1440px; margin: auto; padding: 0 0 60px; }
 .seed-dot.playin  { background: var(--gold); }
 .seed-dot.inline  { display: inline-block; }
 .sth-both {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; min-width: 600px;
 }
-@media (max-width: 900px) { .sth-both { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .sth-both { grid-template-columns: 1fr; min-width: 0; } }
 .sth-conf-title {
   font-size: 12px; font-weight: 800; color: #7a8fa0;
   text-transform: uppercase; letter-spacing: .1em; margin: 0 0 8px;
@@ -134,6 +135,7 @@ main { max-width: 1440px; margin: auto; padding: 0 0 60px; }
 .sth-team-cell { display: flex; align-items: center; gap: 7px; }
 .sth-abbr { font-weight: 800; }
 .sth-name { color: #6e7f90; font-size: 11px; }
+@media (max-width: 1100px) { .sth-name { display: none; } }
 .sth-losses { color: #8a9daf; }
 .sth-pct { color: #5a7088; font-size: 12px; }
 
@@ -861,11 +863,15 @@ th.stats-col { color: #8a9daf; font-size: 10px; letter-spacing: .08em; text-tran
 
 /* ── Player achievement badge ── */
 .player-badge {
-  display: inline-flex; align-items: center;
-  font-size: 13px; line-height: 1;
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; font-weight: 700; line-height: 1;
   margin-left: 5px;
-  cursor: default;
+  background: #f0f5fb; border: 1px solid #c8d8e8; border-radius: 10px;
+  padding: 2px 6px;
+  cursor: default; white-space: nowrap;
 }
+.pb-icon { font-size: 11px; line-height: 1; }
+.pb-label { color: #3a5a7a; letter-spacing: .02em; }
 
 /* ── Awards panel ── */
 .awards-panel { padding: 8px 0; }

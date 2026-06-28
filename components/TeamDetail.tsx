@@ -103,22 +103,22 @@ async function fetchStatsBatch(
   return results;
 }
 
-function buildBadges(awards: NBAData['awards']): Map<string, string[]> {
-  const map = new Map<string, string[]>();
-  const add = (id: string | undefined, b: string) => {
+function buildBadges(awards: NBAData['awards']): Map<string, { icon: string; label: string; season: string }[]> {
+  const map = new Map<string, { icon: string; label: string; season: string }[]>();
+  const add = (id: string | undefined, icon: string, label: string, season: string) => {
     if (!id) return;
     const arr = map.get(id) ?? [];
-    arr.push(b);
+    if (!arr.some(b => b.label === label && b.season === season)) arr.push({ icon, label, season });
     map.set(id, arr);
   };
   for (const s of awards ?? []) {
-    add(s.mvp?.athleteId, `👑MVP`);
-    add(s.dpoy?.athleteId, `🛡DPOY`);
-    add(s.roy?.athleteId, `⭐ROY`);
-    add(s.finalsMvp?.athleteId, `🏆Final`);
-    for (const e of s.allNba1) add(e.athleteId, `★All-NBA1`);
-    for (const e of s.allNba2) add(e.athleteId, `☆All-NBA2`);
-    for (const e of s.allRookie1) add(e.athleteId, `⭐Rookie`);
+    add(s.mvp?.athleteId, '👑', 'MVP', s.season);
+    add(s.dpoy?.athleteId, '🛡', 'DPOY', s.season);
+    add(s.roy?.athleteId, '⭐', 'ROY', s.season);
+    add(s.finalsMvp?.athleteId, '🏆', 'Finals', s.season);
+    for (const e of s.allNba1) add(e.athleteId, '★', 'All-NBA 1st', s.season);
+    for (const e of s.allNba2) add(e.athleteId, '☆', 'All-NBA 2nd', s.season);
+    for (const e of s.allRookie1) add(e.athleteId, '⭐', 'All-Rookie', s.season);
   }
   return map;
 }
@@ -236,7 +236,10 @@ export default function TeamDetail({ team: t, players, data }: Props) {
                           ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
                           : p.name}
                         {(awardBadges.get(p.id) ?? []).map(b => (
-                          <span key={b} className="player-badge" title={b.replace(/^[^\w]+/, '')}>{b.match(/^[^\w]+/)?.[0] ?? b}</span>
+                          <span key={b.label + b.season} className="player-badge" title={b.season}>
+                            <span className="pb-icon">{b.icon}</span>
+                            <span className="pb-label">{b.label}</span>
+                          </span>
                         ))}
                       </div>
                     </td>

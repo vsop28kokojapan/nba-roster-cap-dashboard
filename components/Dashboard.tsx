@@ -126,27 +126,27 @@ function TeamGrid({ teams, data, max }: { teams: Team[]; data: NBAData; max: num
   );
 }
 
-function buildAwardBadges(awards: NBAData['awards']): Map<string, string[]> {
-  const map = new Map<string, string[]>();
-  const add = (id: string | undefined, badge: string) => {
+function buildAwardBadges(awards: NBAData['awards']): Map<string, { icon: string; label: string; season: string }[]> {
+  const map = new Map<string, { icon: string; label: string; season: string }[]>();
+  const add = (id: string | undefined, icon: string, label: string, season: string) => {
     if (!id) return;
     const list = map.get(id) ?? [];
-    list.push(badge);
+    if (!list.some(b => b.label === label && b.season === season)) list.push({ icon, label, season });
     map.set(id, list);
   };
   for (const s of (awards ?? [])) {
-    add(s.mvp?.athleteId, '👑MVP');
-    add(s.dpoy?.athleteId, '🛡DPOY');
-    add(s.roy?.athleteId, '⭐ROY');
-    add(s.finalsMvp?.athleteId, '🏆FMV');
-    for (const e of s.allNba1) add(e.athleteId, '★');
-    for (const e of s.allNba2) add(e.athleteId, '☆');
+    add(s.mvp?.athleteId, '👑', 'MVP', s.season);
+    add(s.dpoy?.athleteId, '🛡', 'DPOY', s.season);
+    add(s.roy?.athleteId, '⭐', 'ROY', s.season);
+    add(s.finalsMvp?.athleteId, '🏆', 'Finals', s.season);
+    for (const e of s.allNba1) add(e.athleteId, '★', 'All-NBA 1st', s.season);
+    for (const e of s.allNba2) add(e.athleteId, '☆', 'All-NBA 2nd', s.season);
   }
   return map;
 }
 
 function PlayerTable({ players, awards }: { players: Player[]; awards: NBAData['awards'] }) {
-  const badges = buildAwardBadges(awards);
+  const badges = buildAwardBadges(awards ?? []);
   return (
     <div className="table-wrap">
       <table>
@@ -169,7 +169,10 @@ function PlayerTable({ players, awards }: { players: Player[]; awards: NBAData['
                     ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
                     : p.name}
                   {(badges.get(p.id) ?? []).map(b => (
-                    <span key={b} className="player-badge" title={b}>{b.replace(/[A-Z]+$/, '')}</span>
+                    <span key={b.label + b.season} className="player-badge" title={b.season}>
+                      <span className="pb-icon">{b.icon}</span>
+                      <span className="pb-label">{b.label}</span>
+                    </span>
                   ))}
                 </div>
               </td>
@@ -336,13 +339,16 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
 
       <main>
         <Scoreboard />
-        {(data.standings?.length ?? 0) > 0 && <StandingsHero standings={data.standings[0]} />}
-        {(data.standings?.length ?? 0) > 0 && (
-          <TournamentSection
-            standings={data.standings[0]}
-            awards={data.awards?.[0]}
-          />
-        )}
+        {(data.standings?.length ?? 0) > 0 && (() => {
+          const curStandings = data.standings.find(s => s.season === data.meta.season) ?? data.standings[0];
+          const curAwards = data.awards?.find(a => a.season === data.meta.season) ?? data.awards?.[0];
+          return (
+            <>
+              <StandingsHero standings={curStandings} />
+              <TournamentSection standings={curStandings} awards={curAwards} />
+            </>
+          );
+        })()}
         <ThresholdCards thresholds={data.thresholds} />
         <RuleGuide thresholds={data.thresholds} />
 
