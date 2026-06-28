@@ -578,7 +578,6 @@ export default function TeamDetail({ team: t, players, data }: Props) {
           />
         )}
 
-        <FutureDraftPicksSection abbr={t.abbreviation} />
         <DraftPicksSection picks={data.draftPicks?.[t.abbreviation] ?? []} season={data.meta.season} />
 
         {/* Salary tier legend */}
