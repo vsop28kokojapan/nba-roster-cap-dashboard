@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { SeasonStandings, SeasonAwards, StandingEntry } from '@/lib/types';
+import SeriesDrawer, { type MatchType } from './SeriesDrawer';
 
 type BracketTab = 'cup' | 'playin' | 'playoffs';
 
@@ -52,7 +53,7 @@ function TeamPill({
 // ── Matchup box ───────────────────────────────────────────────────────────────
 
 function MatchupBox({
-  top, bot, series, label, scoreTop, scoreBot,
+  top, bot, series, label, scoreTop, scoreBot, onDetails,
 }: {
   top: StandingEntry | null | undefined;
   bot: StandingEntry | null | undefined;
@@ -60,6 +61,7 @@ function MatchupBox({
   label?: string;
   scoreTop?: string;
   scoreBot?: string;
+  onDetails?: () => void;
 }) {
   const hasSeries = Boolean(series);
   const hasScore = Boolean(scoreTop && scoreBot);
@@ -80,6 +82,11 @@ function MatchupBox({
       <TeamPill entry={top} isWinner={topWon} isLoser={decided && !topWon && top != null} />
       <div className="bracket-vs">{vsContent}</div>
       <TeamPill entry={bot} isWinner={botWon} isLoser={decided && !botWon && bot != null} />
+      {onDetails && top && bot && (
+        <button className="matchup-details-btn" onClick={onDetails}>
+          ゲーム詳細 ▾
+        </button>
+      )}
     </div>
   );
 }
@@ -87,12 +94,14 @@ function MatchupBox({
 // ── Playoff bracket ───────────────────────────────────────────────────────────
 
 function PlayoffBracket({
-  east, west, series, allByAbbr,
+  east, west, series, allByAbbr, season, openDrawer,
 }: {
   east: StandingEntry[];
   west: StandingEntry[];
   series: SeriesData[];
   allByAbbr: Map<string, StandingEntry>;
+  season: string;
+  openDrawer: (t1: string, t2: string, type: MatchType, title: string) => void;
 }) {
   function buildConf(entries: StandingEntry[]) {
     const r1 = R1_PAIRS.map(([s1, s2]) => {
@@ -119,6 +128,9 @@ function PlayoffBracket({
   const finBot = westB.cf.winner ? (allByAbbr.get(westB.cf.winner!) ?? null) : null;
   const finS = findSeries(series, finTop?.abbr ?? null, finBot?.abbr ?? null);
 
+  const details = (top: StandingEntry | null, bot: StandingEntry | null, type: MatchType, roundLabel: string) =>
+    top && bot ? () => openDrawer(top.abbr, bot.abbr, type, `${top.abbr} vs ${bot.abbr} — ${roundLabel}`) : undefined;
+
   const renderConf = (b: ReturnType<typeof buildConf>, label: string) => (
     <div className="playoff-conf-bracket">
       <h4 className="bracket-conf-title">{label} カンファレンス</h4>
@@ -126,23 +138,27 @@ function PlayoffBracket({
         <div className="playoff-round">
           <p className="round-label">1回戦</p>
           {b.r1.map((slot, i) => (
-            <MatchupBox key={i} top={slot.top} bot={slot.bot} series={slot.s} />
+            <MatchupBox key={i} top={slot.top} bot={slot.bot} series={slot.s}
+              onDetails={details(slot.top, slot.bot, 'playoffs', '1回戦')} />
           ))}
         </div>
         <div className="playoff-round">
           <p className="round-label">準決勝</p>
           {b.r2.map((slot, i) => (
-            <MatchupBox key={i} top={slot.top} bot={slot.bot} series={slot.s} />
+            <MatchupBox key={i} top={slot.top} bot={slot.bot} series={slot.s}
+              onDetails={details(slot.top, slot.bot, 'playoffs', '準決勝')} />
           ))}
         </div>
         <div className="playoff-round">
           <p className="round-label">カンファレンス決勝</p>
-          <MatchupBox top={b.cf.top} bot={b.cf.bot} series={b.cf.s} />
+          <MatchupBox top={b.cf.top} bot={b.cf.bot} series={b.cf.s}
+            onDetails={details(b.cf.top, b.cf.bot, 'playoffs', 'カンファレンス決勝')} />
         </div>
       </div>
     </div>
   );
 
+  void season; // used via openDrawer closure
   return (
     <>
       <div className="playoff-bracket-wrap">
@@ -151,7 +167,8 @@ function PlayoffBracket({
       </div>
       <div className="playoff-finals-section">
         <p className="round-label finals-label">🏆 NBAファイナル</p>
-        <MatchupBox top={finTop} bot={finBot} series={finS} />
+        <MatchupBox top={finTop} bot={finBot} series={finS}
+          onDetails={details(finTop, finBot, 'playoffs', 'NBAファイナル')} />
         {finS?.winner && (
           <p className="champion-text">
             🏆 <b>{finTop?.abbr === finS.winner ? finTop?.abbr : finBot?.abbr}</b> が チャンピオン
@@ -165,12 +182,13 @@ function PlayoffBracket({
 // ── Play-in section ───────────────────────────────────────────────────────────
 
 function PlayInSection({
-  east, west, playin, allByAbbr,
+  east, west, playin, allByAbbr, openDrawer,
 }: {
   east: StandingEntry[];
   west: StandingEntry[];
   playin: PlayinGame[];
   allByAbbr: Map<string, StandingEntry>;
+  openDrawer: (t1: string, t2: string, type: MatchType, title: string) => void;
 }) {
   const hasData = playin.length > 0;
 
@@ -201,12 +219,14 @@ function PlayInSection({
             label="7-8戦：勝者が7位シード確定"
             scoreTop={game78 ? game78.scoreW : undefined}
             scoreBot={game78 ? game78.scoreL : undefined}
+            onDetails={top78 && bot78 ? () => openDrawer(top78.abbr, bot78.abbr, 'playin', `7-8戦 (${conf})`) : undefined}
           />
           <MatchupBox
             top={top910} bot={bot910}
             label="9-10戦：敗者は敗退"
             scoreTop={game910 ? game910.scoreW : undefined}
             scoreBot={game910 ? game910.scoreL : undefined}
+            onDetails={top910 && bot910 ? () => openDrawer(top910.abbr, bot910.abbr, 'playin', `9-10戦 (${conf})`) : undefined}
           />
         </div>
         <MatchupBox
@@ -214,6 +234,7 @@ function PlayInSection({
           label="敗者戦：8位シードを賭けて"
           scoreTop={consolation ? consolation.scoreW : undefined}
           scoreBot={consolation ? consolation.scoreL : undefined}
+          onDetails={topCons && botCons ? () => openDrawer(topCons.abbr, botCons.abbr, 'playin', `敗者戦 (${conf})`) : undefined}
         />
         {hasData && playoff7 && playoff8 && (
           <p className="playin-note">
@@ -235,22 +256,26 @@ function PlayInSection({
 // ── NBA Cup section ───────────────────────────────────────────────────────────
 
 function CupMatchup({
-  winner, loser, allByAbbr,
+  winner, loser, allByAbbr, onDetails,
 }: {
   winner: string; loser: string;
   allByAbbr: Map<string, StandingEntry>;
+  onDetails?: () => void;
 }) {
   return (
     <div className="bracket-matchup" style={{ margin: 0 }}>
       <TeamPill entry={allByAbbr.get(winner)} isWinner showRecord={false} />
       <div className="bracket-vs">vs</div>
       <TeamPill entry={allByAbbr.get(loser)} isLoser showRecord={false} />
+      {onDetails && (
+        <button className="matchup-details-btn" onClick={onDetails}>ゲーム詳細 ▾</button>
+      )}
     </div>
   );
 }
 
 function NbaCupSection({
-  awards, cup, cupGroup, allByAbbr, east, west,
+  awards, cup, cupGroup, allByAbbr, east, west, openDrawer,
 }: {
   awards: SeasonAwards | undefined;
   cup: CupGame[];
@@ -258,6 +283,7 @@ function NbaCupSection({
   allByAbbr: Map<string, StandingEntry>;
   east: StandingEntry[];
   west: StandingEntry[];
+  openDrawer: (t1: string, t2: string, type: MatchType, title: string) => void;
 }) {
   const qf = cup.filter(c => c.round === 'Quarterfinal');
   const sf = cup.filter(c => c.round === 'Semifinal');
@@ -357,7 +383,8 @@ function NbaCupSection({
             <div className="cup-bracket-round">
               <p className="round-label">準々決勝</p>
               <div className="cup-matchups-grid">
-                {qf.map((g, i) => <CupMatchup key={i} {...g} allByAbbr={allByAbbr} />)}
+                {qf.map((g, i) => <CupMatchup key={i} {...g} allByAbbr={allByAbbr}
+                  onDetails={() => openDrawer(g.winner, g.loser, 'cup-knockout', `NBAカップ 準々決勝`)} />)}
               </div>
             </div>
           )}
@@ -365,14 +392,16 @@ function NbaCupSection({
             <div className="cup-bracket-round">
               <p className="round-label">準決勝</p>
               <div className="cup-matchups-grid">
-                {sf.map((g, i) => <CupMatchup key={i} {...g} allByAbbr={allByAbbr} />)}
+                {sf.map((g, i) => <CupMatchup key={i} {...g} allByAbbr={allByAbbr}
+                    onDetails={() => openDrawer(g.winner, g.loser, 'cup-knockout', `NBAカップ 準決勝`)} />)}
               </div>
             </div>
           )}
           {fin && (
             <div className="cup-bracket-round">
               <p className="round-label">決勝</p>
-              <CupMatchup {...fin} allByAbbr={allByAbbr} />
+              <CupMatchup {...fin} allByAbbr={allByAbbr}
+                onDetails={() => openDrawer(fin.winner, fin.loser, 'cup-knockout', `NBAカップ 決勝`)} />
             </div>
           )}
         </div>
@@ -397,6 +426,10 @@ export default function TournamentSection({
   const [tab, setTab] = useState<BracketTab>('playoffs');
   const [apiData, setApiData] = useState<PlayoffApiResult>({ series: [], cup: [], playin: [], cupGroup: [] });
   const [loaded, setLoaded] = useState(false);
+  const [drawer, setDrawer] = useState<{ t1: string; t2: string; type: MatchType; title: string } | null>(null);
+
+  const openDrawer = (t1: string, t2: string, type: MatchType, title: string) =>
+    setDrawer({ t1, t2, type, title });
 
   useEffect(() => {
     if (!standings?.season) return;
@@ -448,6 +481,7 @@ export default function TournamentSection({
           allByAbbr={allByAbbr}
           east={standings.east}
           west={standings.west}
+          openDrawer={openDrawer}
         />
       )}
       {tab === 'playin' && (
@@ -456,6 +490,7 @@ export default function TournamentSection({
           west={standings.west}
           playin={apiData.playin}
           allByAbbr={allByAbbr}
+          openDrawer={openDrawer}
         />
       )}
       {tab === 'playoffs' && (
@@ -463,6 +498,20 @@ export default function TournamentSection({
           east={standings.east}
           west={standings.west}
           series={apiData.series}
+          allByAbbr={allByAbbr}
+          season={standings.season}
+          openDrawer={openDrawer}
+        />
+      )}
+
+      {drawer && (
+        <SeriesDrawer
+          t1={drawer.t1}
+          t2={drawer.t2}
+          matchType={drawer.type}
+          season={standings.season}
+          title={drawer.title}
+          onClose={() => setDrawer(null)}
           allByAbbr={allByAbbr}
         />
       )}
