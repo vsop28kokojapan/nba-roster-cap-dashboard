@@ -304,13 +304,17 @@ function DraftPicksSection({ picks, season }: { picks: DraftPickEntry[]; season:
 // ── Future draft picks ─────────────────────────────────────────────────────
 
 function PickTradeModal({ pick, onClose }: { pick: FuturePickAsset; onClose: () => void }) {
+  const t = pick.trade;
+  const tradeDate = t?.date ?? t?.tradeRef?.match(/(\d{1,2}\/\d{1,2}\/\d{4})/)?.[1] ?? null;
+  const desc = t?.descriptionJa || t?.descriptionEn || null;
+
   return (
     <div className="drawer-overlay" onClick={onClose}>
       <div className="pick-modal" onClick={e => e.stopPropagation()}>
         <div className="pick-modal-header">
           <div>
             <span className="pick-modal-round">{pick.round === 1 ? '1巡目' : '2巡目'} 指名権</span>
-            <span className="pick-modal-year">{pick.year}年</span>
+            <span className="pick-modal-year">{pick.year}年ドラフト</span>
           </div>
           <button className="drawer-close" onClick={onClose} aria-label="閉じる">✕</button>
         </div>
@@ -326,54 +330,38 @@ function PickTradeModal({ pick, onClose }: { pick: FuturePickAsset; onClose: () 
                 <span className="pm-value pm-protection">{pick.protection}</span>
               </div>
             )}
-            {pick.trade && (
+            {t?.tradeRef && (
+              <div className="pm-row">
+                <span className="pm-label">トレード履歴</span>
+                <span className="pm-value pm-trade-ref">{t.tradeRef}</span>
+              </div>
+            )}
+            {tradeDate && !t?.tradeRef && (
               <div className="pm-row">
                 <span className="pm-label">トレード日</span>
-                <span className="pm-value">{pick.trade.date}</span>
+                <span className="pm-value">{tradeDate}</span>
               </div>
             )}
           </div>
-          {pick.trade?.descriptionJa && (
-            <p className="pm-description">{pick.trade.descriptionJa}</p>
+          {desc && (
+            <p className="pm-description">{desc}</p>
           )}
-          {pick.trade?.espnUrl && (
-            <a
-              className="pm-espn-link"
-              href={pick.trade.espnUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+          {t?.espnUrl && (
+            <a className="pm-espn-link" href={t.espnUrl} target="_blank" rel="noopener noreferrer">
               ESPN記事を見る →
             </a>
           )}
+          <p className="pm-source">出典: RealGM</p>
         </div>
       </div>
     </div>
   );
 }
 
-function FutureDraftPicksSection({ abbr }: { abbr: string }) {
-  const [picks, setPicks] = useState<FuturePickAsset[]>([]);
-  const [loading, setLoading] = useState(true);
+function FutureDraftPicksSection({ abbr, allPicks }: { abbr: string; allPicks: Record<string, FuturePickAsset[]> | null | undefined }) {
   const [selectedPick, setSelectedPick] = useState<FuturePickAsset | null>(null);
 
-  useEffect(() => {
-    fetch('/draft-picks.json', { cache: 'no-store' })
-      .then(r => r.json())
-      .then((d: Record<string, FuturePickAsset[]>) => {
-        setPicks(d[abbr] ?? []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [abbr]);
-
-  if (loading) return (
-    <section className="future-picks-section">
-      <h3>将来の保有指名権</h3>
-      <p className="fp-loading">読み込み中…</p>
-    </section>
-  );
-
+  const picks = allPicks?.[abbr] ?? [];
   if (picks.length === 0) return null;
 
   const years = [...new Set(picks.map(p => p.year))].sort();
@@ -578,6 +566,7 @@ export default function TeamDetail({ team: t, players, data }: Props) {
           />
         )}
 
+        <FutureDraftPicksSection abbr={t.abbreviation} allPicks={data.futurePicks} />
         <DraftPicksSection picks={data.draftPicks?.[t.abbreviation] ?? []} season={data.meta.season} />
 
         {/* Salary tier legend */}

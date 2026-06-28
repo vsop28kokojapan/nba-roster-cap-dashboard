@@ -1,6 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { chromium } from 'playwright-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+chromium.use(StealthPlugin());
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = path.join(root, 'data');
@@ -126,6 +129,208 @@ function translateTransaction(description = '') {
     .replace(/cashとドラフト関連の権利/gi, '金銭およびドラフト関連の権利');
 }
 
+// ── RealGM: future draft picks ─────────────────────────────────────────────
+
+// Section heading → ESPN abbreviation
+const SECTION_ABBR = {
+  'Atlanta Hawks': 'ATL', 'Boston Celtics': 'BOS', 'Brooklyn Nets': 'BKN',
+  'Charlotte Hornets': 'CHA', 'Chicago Bulls': 'CHI', 'Cleveland Cavaliers': 'CLE',
+  'Dallas Mavericks': 'DAL', 'Denver Nuggets': 'DEN', 'Detroit Pistons': 'DET',
+  'Golden State Warriors': 'GS', 'Houston Rockets': 'HOU', 'Indiana Pacers': 'IND',
+  'Los Angeles Clippers': 'LAC', 'Los Angeles Lakers': 'LAL',
+  'Memphis Grizzlies': 'MEM', 'Miami Heat': 'MIA', 'Milwaukee Bucks': 'MIL',
+  'Minnesota Timberwolves': 'MIN', 'New Orleans Pelicans': 'NO', 'New York Knicks': 'NY',
+  'Oklahoma City Thunder': 'OKC', 'Orlando Magic': 'ORL', 'Philadelphia Sixers': 'PHI',
+  'Phoenix Suns': 'PHX', 'Portland Trail Blazers': 'POR', 'Sacramento Kings': 'SAC',
+  'San Antonio Spurs': 'SA', 'Toronto Raptors': 'TOR', 'Utah Jazz': 'UTAH',
+  'Washington Wizards': 'WSH',
+};
+
+// Short team name in pick descriptions → ESPN abbreviation
+const PICK_ABBR = {
+  'Atlanta': 'ATL', 'Boston': 'BOS', 'Brooklyn': 'BKN', 'Charlotte': 'CHA',
+  'Chicago': 'CHI', 'Cleveland': 'CLE', 'Dallas': 'DAL', 'Denver': 'DEN',
+  'Detroit': 'DET', 'Golden State': 'GS', 'Houston': 'HOU', 'Indiana': 'IND',
+  'L.A. Clippers': 'LAC', 'Los Angeles Clippers': 'LAC',
+  'L.A. Lakers': 'LAL', 'Los Angeles Lakers': 'LAL',
+  'Memphis': 'MEM', 'Miami': 'MIA', 'Milwaukee': 'MIL', 'Minnesota': 'MIN',
+  'New Orleans': 'NO', 'New York': 'NY', 'Oklahoma City': 'OKC', 'Orlando': 'ORL',
+  'Philadelphia': 'PHI', 'Phoenix': 'PHX', 'Portland': 'POR', 'Sacramento': 'SAC',
+  'San Antonio': 'SA', 'Toronto': 'TOR', 'Utah': 'UTAH', 'Washington': 'WSH',
+};
+
+function fromAbbr(text) {
+  const primary = text.split(/\s+or\s+/i)[0].trim();
+  if (PICK_ABBR[primary]) return PICK_ABBR[primary];
+  for (const [n, a] of Object.entries(PICK_ABBR)) {
+    if (primary.startsWith(n) || n.startsWith(primary)) return a;
+  }
+  return primary;
+}
+
+function extractProtection(detail) {
+  let m = detail.match(/protected for selections?\s+(\d+)\s*(?:through|-)\s*(\d+)/i);
+  if (m) return `Top-${m[2]}プロテクト`;
+  m = detail.match(/barred from selections?\s+\d+\s*(?:through|-)\s*(\d+)/i);
+  if (m) return `Top-${m[1]}プロテクト`;
+  m = detail.match(/protected for selection\s+1\b/i);
+  if (m) return '1位プロテクト';
+  return null;
+}
+
+function parsePickText(text, targetYears) {
+  if (!text || /^No picks/i.test(text)) return { picks: [], gone: new Set() };
+  const picks = [], gone = new Set();
+  for (const entry of text.split(/\n\n+/)) {
+    const lines = entry.trim().split('\n');
+    const header = lines[0] || '';
+    const detail = lines.slice(1).join(' ');
+    const m = header.match(/^(\d{4})\s+(first|second)\s+round\s+draft\s+pick\s+(from|to)\s+(.+)/i);
+    if (!m) continue;
+    const year = parseInt(m[1]);
+    if (!targetYears.has(year)) continue;
+    const round = m[2].toLowerCase() === 'first' ? 1 : 2;
+    const dir = m[3].toLowerCase(); // 'from' or 'to'
+    const teamText = m[4];
+    const swap = /\bswap\b/i.test(teamText) || /\bswap\b/i.test(header);
+    if (dir === 'to' && !swap) { gone.add(`${year}-${round}`); continue; }
+    if (dir === 'from' && !swap) {
+      const tradeRef = (detail.match(/\[([^\]]+)\]/g) || []).pop()?.replace(/[\[\]]/g, '') || '';
+      picks.push({ year, round, from: fromAbbr(teamText), protection: extractProtection(detail), tradeRef, rawDetail: detail });
+    }
+  }
+  return { picks, gone };
+}
+
+async function scrapeRealGMPicks() {
+  const currentYear = new Date().getFullYear();
+  const targetYears = new Set([1,2,3,4,5].map(n => currentYear + n));
+  let browser;
+  try {
+    browser = await chromium.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    });
+    const ctx = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+      viewport: { width: 1280, height: 900 }, locale: 'en-US',
+    });
+    const page = await ctx.newPage();
+
+    // Establish session via homepage first, then navigate to correct URL
+    console.log('RealGM: セッション確立中...');
+    await page.goto('https://basketball.realgm.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(1500);
+    console.log('RealGM: 指名権ページ読み込み中...');
+    await page.goto('https://basketball.realgm.com/nba/draft/future_drafts/detailed', {
+      waitUntil: 'domcontentloaded', timeout: 30000,
+    });
+    await page.waitForTimeout(6000);
+
+    // Extract team sections (h2/h3 heading → table with Incoming column)
+    const teamData = await page.evaluate(() => {
+      const result = [];
+      let currentTeam = null;
+      for (const el of document.querySelectorAll('h2,h3,table')) {
+        if (el.tagName === 'H2' || el.tagName === 'H3') {
+          currentTeam = el.textContent?.trim() || null;
+        } else if (el.tagName === 'TABLE' && currentTeam) {
+          const headers = Array.from(el.querySelectorAll('th')).map(h => h.textContent?.trim());
+          if (headers.includes('Incoming')) {
+            result.push({
+              team: currentTeam,
+              rows: Array.from(el.querySelectorAll('tbody tr')).map(tr => {
+                const c = Array.from(tr.querySelectorAll('td')).map(td => td.textContent?.trim() || '');
+                return { year: c[0], incoming: c[1], outgoing: c[2] };
+              }),
+            });
+            currentTeam = null;
+          }
+        }
+      }
+      return result;
+    });
+
+    if (teamData.length === 0) {
+      console.warn('RealGM: データ取得失敗（ページ未ロード）');
+      return null;
+    }
+    console.log(`RealGM: ${teamData.length} チーム取得`);
+
+    const byTeam = {};
+    for (const { team, rows } of teamData) {
+      const clean = team.replace(/\s+Future Traded Pick Details\s*$/i, '').trim();
+      const abbr = SECTION_ABBR[clean];
+      if (!abbr) continue;
+
+      const gone = new Set();
+      const tradedIn = [];
+      for (const row of rows) {
+        const { picks: inPicks, gone: outGone } = parsePickText(row.incoming || '', targetYears);
+        const { gone: moreGone } = parsePickText(row.outgoing || '', targetYears);
+        for (const k of outGone) gone.add(k);
+        for (const k of moreGone) gone.add(k);
+        tradedIn.push(...inPicks);
+      }
+
+      const picks = [];
+      // Own picks not traded away
+      for (const year of [...targetYears].sort()) {
+        for (const round of [1, 2]) {
+          if (!gone.has(`${year}-${round}`)) {
+            picks.push({ year, round, from: null, protection: null, trade: null });
+          }
+        }
+      }
+      // Incoming traded picks
+      for (const p of tradedIn) {
+        picks.push({
+          year: p.year, round: p.round, from: p.from, protection: p.protection,
+          trade: p.tradeRef
+            ? { descriptionJa: null, descriptionEn: p.rawDetail.slice(0, 400), tradeRef: p.tradeRef }
+            : null,
+        });
+      }
+      picks.sort((a, b) => a.year - b.year || a.round - b.round);
+      byTeam[abbr] = picks;
+    }
+
+    console.log(`RealGM: ${Object.keys(byTeam).length} チームの指名権取得完了`);
+    return byTeam;
+  } catch (e) {
+    console.warn('RealGM scraping failed:', e.message);
+    return null;
+  } finally {
+    if (browser) await browser.close();
+  }
+}
+
+// ── Load existing trade details (preserve manually added trade info) ─────────
+
+async function loadExistingPickTrades() {
+  try {
+    const raw = await fs.readFile(
+      path.join(path.dirname(fileURLToPath(import.meta.url)), 'public', 'draft-picks.json'),
+      'utf8'
+    );
+    const existing = JSON.parse(raw);
+    // Build a map: "TEAM-YEAR-ROUND-FROM" → trade details
+    const tradeMap = new Map();
+    for (const [abbr, picks] of Object.entries(existing)) {
+      if (abbr.startsWith('_')) continue;
+      for (const pick of picks) {
+        if (pick.trade) {
+          const key = `${abbr}-${pick.year}-${pick.round}-${pick.from}`;
+          tradeMap.set(key, pick.trade);
+        }
+      }
+    }
+    return tradeMap;
+  } catch {
+    return new Map();
+  }
+}
+
 async function main() {
   await fs.mkdir(outDir, { recursive: true });
   const teamPayload = await get(`${ESPN}/teams?limit=100`);
@@ -192,6 +397,31 @@ async function main() {
     };
   });
 
+  // ── RealGM future picks ──
+  let futurePicks = null;
+  try {
+    const [scraped, tradeMap] = await Promise.all([
+      scrapeRealGMPicks(),
+      loadExistingPickTrades(),
+    ]);
+    if (scraped) {
+      // Restore manually entered trade details
+      for (const [abbr, picks] of Object.entries(scraped)) {
+        for (const pick of picks) {
+          const key = `${abbr}-${pick.year}-${pick.round}-${pick.from}`;
+          if (tradeMap.has(key)) pick.trade = tradeMap.get(key);
+        }
+      }
+      futurePicks = scraped;
+      // Also write to public/draft-picks.json for local fallback
+      const outPath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public', 'draft-picks.json');
+      await fs.writeFile(outPath, JSON.stringify({ _meta: { updatedAt: new Date().toISOString() }, ...scraped }, null, 2), 'utf8');
+      console.log('draft-picks.json 更新完了');
+    }
+  } catch (e) {
+    console.warn('指名権スクレイピングスキップ:', e.message);
+  }
+
   const txFirst = await get(`${ESPN}/transactions?limit=200`);
   const transactions = (txFirst.transactions || []).map((x, i) => ({
     id: `${x.date}-${x.team?.abbreviation || 'NBA'}-${i}`,
@@ -207,14 +437,15 @@ async function main() {
     meta: {
       updatedAt: new Date().toISOString(),
       season,
-      sources: ['ESPN roster / contract / transactions API', 'Spotrac team cap tracker'],
+      sources: ['ESPN roster / contract / transactions API', 'Spotrac team cap tracker', ...(futurePicks ? ['RealGM future draft picks'] : [])],
       notes: ['サラリーはESPNのロスター契約値。チーム総額・デッドキャップ・エプロン判定はSpotrac取得成功時のみ正確なチーム配賦額を使用。', '情報提供目的です。契約判断はNBA公式発表・CBA・各チーム発表でも確認してください。'],
       warning: capWarning
     },
     thresholds,
     teams: teamRows,
     players,
-    transactions
+    transactions,
+    futurePicks: futurePicks ?? null,
   };
   await fs.writeFile(path.join(outDir, 'nba-data.json'), JSON.stringify(data, null, 2), 'utf8');
   console.log(`更新完了: ${teamRows.length}チーム / ${players.length}選手 / ${transactions.length}件`);

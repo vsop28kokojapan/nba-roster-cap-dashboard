@@ -119,6 +119,7 @@ export interface NBAData {
   draftPicks: Record<string, DraftPickEntry[]>;
   awards: SeasonAwards[];
   standings: SeasonStandings[];
+  futurePicks?: Record<string, FuturePickAsset[]> | null;
 }
 
 // ── 履歴データ型 ──────────────────────────────────────────────
@@ -155,10 +156,12 @@ export interface FuturePickAsset {
   from: string | null;
   protection: string | null;
   trade: {
-    date: string;
-    teams: string[];
-    descriptionJa: string;
-    espnUrl: string;
+    descriptionEn?: string;
+    descriptionJa?: string | null;
+    tradeRef?: string;
+    date?: string;
+    teams?: string[];
+    espnUrl?: string;
   } | null;
 }
 
