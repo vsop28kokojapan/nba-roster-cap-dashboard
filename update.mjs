@@ -331,6 +331,104 @@ async function loadExistingPickTrades() {
   }
 }
 
+// ── ESPN supplemental: draft picks / awards / standings ────────────────────
+
+const ESPN_CORE = 'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba';
+
+async function fetchDraftPicks(seasonStart, teamIdToAbbr) {
+  const draftYear = seasonStart + 1;
+  try {
+    const rounds = await get(`${ESPN_CORE}/seasons/${draftYear}/draft/rounds`);
+    if (!rounds.items?.length) return {};
+    const allPickRefs = [];
+    for (const rnd of rounds.items) {
+      for (const p of (rnd.picks ?? [])) {
+        const athRef = p.athlete?.['$ref'];
+        const teamId = p.team?.['$ref']?.split('/teams/')?.[1]?.split('?')?.[0] ?? '';
+        if (!athRef || !teamId) continue;
+        allPickRefs.push({ ref: athRef, meta: { overall: p.overall, round: p.round, pick: p.pick, traded: Boolean(p.traded), tradeNote: p.tradeNote || null }, teamId });
+      }
+    }
+    const resolved = await mapLimit(allPickRefs, 10, async item => {
+      try { const a = await get(item.ref); return { ...item, playerName: a.fullName || '—' }; }
+      catch { return { ...item, playerName: '—' }; }
+    });
+    const result = {};
+    for (const r of resolved) {
+      const abbr = teamIdToAbbr.get(r.teamId);
+      if (!abbr) continue;
+      if (!result[abbr]) result[abbr] = [];
+      result[abbr].push({ playerName: r.playerName, ...r.meta });
+    }
+    return result;
+  } catch { return {}; }
+}
+
+const AWARD_KEY_MAP = {
+  'MVP': 'mvp', 'Defensive Player of the Year': 'dpoy', 'Rookie of the Year': 'roy',
+  'Most Improved Player': 'mip', 'Sixth Man of the Year': 'sixthMan', 'Finals MVP': 'finalsMvp',
+  'NBA Cup MVP': 'nbaCupMvp', 'Clutch Player of the Year': 'clutchPlayer',
+  'All-NBA 1st Team': 'allNba1', 'All-NBA 2nd Team': 'allNba2', 'All-NBA 3rd Team': 'allNba3',
+  'All-Defensive 1st Team': 'allDefense1', 'All-Defensive 2nd Team': 'allDefense2',
+  'All-Rookie 1st Team': 'allRookie1',
+};
+const ARRAY_AWARD_KEYS = new Set(['allNba1','allNba2','allNba3','allDefense1','allDefense2','allRookie1']);
+
+async function fetchSeasonAwards(year) {
+  const season = `${year - 1}-${String(year).slice(-2)}`;
+  const result = { season, allNba1: [], allNba2: [], allNba3: [], allDefense1: [], allDefense2: [], allRookie1: [] };
+  try {
+    const awardsData = await get(`${ESPN_CORE}/seasons/${year}/awards?limit=50`);
+    const awardRefs = (awardsData.items ?? []).map(i => i['$ref']).filter(Boolean);
+    const details = await mapLimit(awardRefs, 8, async ref => {
+      try {
+        const award = await get(ref);
+        const winnerRefs = (award.winners ?? []).map(w => w.athlete?.['$ref']).filter(Boolean);
+        const winners = await mapLimit(winnerRefs, 5, async athRef => {
+          const id = athRef.match(/athletes\/(\d+)/)?.[1] ?? '';
+          try { const a = await get(athRef); return { athleteId: id, athleteName: a.fullName || '—' }; }
+          catch { return { athleteId: id, athleteName: '—' }; }
+        });
+        return { name: String(award.name ?? ''), winners };
+      } catch { return null; }
+    });
+    for (const d of details) {
+      if (!d) continue;
+      const key = AWARD_KEY_MAP[d.name];
+      if (!key) continue;
+      if (ARRAY_AWARD_KEYS.has(key)) result[key] = d.winners;
+      else result[key] = d.winners[0];
+    }
+  } catch { /* awards unavailable */ }
+  return result;
+}
+
+async function fetchSeasonStandings(year) {
+  const season = `${year - 1}-${String(year).slice(-2)}`;
+  try {
+    const data = await get(`https://site.api.espn.com/apis/v2/sports/basketball/nba/standings?season=${year}`);
+    const parseConf = conf => {
+      const entries = conf.standings?.entries ?? [];
+      return entries.map(e => {
+        const team = e.team ?? {};
+        const statsNum = {};
+        for (const s of (e.stats ?? [])) if (s.name && s.value !== undefined) statsNum[s.name] = s.value;
+        const logos = team.logos ?? [];
+        return {
+          rank: Math.round(statsNum.playoffSeed ?? 99),
+          abbr: String(team.abbreviation ?? ''),
+          name: String(team.displayName ?? ''),
+          wins: Math.round(statsNum.wins ?? 0),
+          losses: Math.round(statsNum.losses ?? 0),
+          logo: logos.find(l => l.rel?.includes('default'))?.href ?? '',
+        };
+      }).sort((a, b) => a.rank - b.rank);
+    };
+    const [east, west] = data.children ?? [];
+    return { season, east: east ? parseConf(east) : [], west: west ? parseConf(west) : [] };
+  } catch { return { season, east: [], west: [] }; }
+}
+
 async function main() {
   await fs.mkdir(outDir, { recursive: true });
   const teamPayload = await get(`${ESPN}/teams?limit=100`);
@@ -422,7 +520,18 @@ async function main() {
     console.warn('指名権スクレイピングスキップ:', e.message);
   }
 
-  const txFirst = await get(`${ESPN}/transactions?limit=200`);
+  const espnYear = seasonStart + 1;
+  const teamIdToAbbr = new Map(teams.map(t => [String(t.id), t.abbreviation]));
+
+  const [txFirst, draftPicks, awardsArr, standingsArr] = await Promise.all([
+    get(`${ESPN}/transactions?limit=200`),
+    fetchDraftPicks(seasonStart, teamIdToAbbr),
+    Promise.all([espnYear, espnYear - 1, espnYear - 2].map(y => fetchSeasonAwards(y).catch(() => null))),
+    Promise.all([espnYear, espnYear - 1, espnYear - 2].map(y => fetchSeasonStandings(y).catch(() => null))),
+  ]);
+  const awards = awardsArr.filter(a => a !== null);
+  const standings = standingsArr.filter(s => s !== null);
+
   const transactions = (txFirst.transactions || []).map((x, i) => ({
     id: `${x.date}-${x.team?.abbreviation || 'NBA'}-${i}`,
     date: x.date,
@@ -445,6 +554,9 @@ async function main() {
     teams: teamRows,
     players,
     transactions,
+    draftPicks,
+    awards,
+    standings,
     futurePicks: futurePicks ?? null,
   };
   await fs.writeFile(path.join(outDir, 'nba-data.json'), JSON.stringify(data, null, 2), 'utf8');
