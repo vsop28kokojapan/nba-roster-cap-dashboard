@@ -1349,3 +1349,24 @@ th.yr-col { font-size: 10px; color: #8a9daf; text-transform: uppercase; letter-s
 .pm-source {
   font-size: 11px; color: #8a9aaa; margin-top: 14px; text-align: right;
 }
+
+/* ── チームフェーズバッジ ── */
+.phase-badge {
+  display: inline-block;
+  font-size: 11px; font-weight: 700; letter-spacing: .03em;
+  padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+  cursor: default; margin-left: auto;
+}
+.phase-championship { background: #FFF3CD; color: #7D5A00; border: 1.5px solid #F0B429; }
+.phase-rising       { background: #D4EDDA; color: #155724; border: 1.5px solid #28A745; }
+.phase-playoff      { background: #D1ECF1; color: #0C5460; border: 1.5px solid #17A2B8; }
+.phase-bubble       { background: #FFF0CC; color: #6B4F00; border: 1.5px solid #FFC107; }
+.phase-transition   { background: #F0F4F8; color: #4A5568; border: 1.5px solid #A0AEC0; }
+.phase-rebuild      { background: #DBE8F6; color: #1A3E5C; border: 1.5px solid #3B82F6; }
+.phase-draft        { background: #EDE9F7; color: #4B2D80; border: 1.5px solid #7C3AED; }
+
+/* TeamDetail ヘッダー内のバッジ横並び */
+.detail-badges {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 2px;
+}
+.detail-badges .phase-badge { margin-left: 0; }

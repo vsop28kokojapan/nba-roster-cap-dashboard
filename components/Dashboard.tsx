@@ -3,7 +3,8 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import type { NBAData, Player, Team, Transaction } from '@/lib/types';
-import { yen, million, fmtDate, badgeClass, distanceText, lineDifference, capScale } from '@/lib/utils';
+import { yen, million, fmtDate, badgeClass, distanceText, lineDifference, capScale, getTeamPhase } from '@/lib/utils';
+import type { TeamPhase } from '@/lib/utils';
 import CapTrack from './CapTrack';
 import ThresholdCards from './ThresholdCards';
 import RuleGuide from './RuleGuide';
@@ -47,6 +48,14 @@ async function fetchLatestData(): Promise<NBAData | null> {
 
 function Badge({ status }: { status: string }) {
   return <span className={`badge ${badgeClass(status)}`}>{status}</span>;
+}
+
+function PhaseBadge({ phase }: { phase: TeamPhase }) {
+  return (
+    <span className={`phase-badge phase-${phase.tier}`} title={phase.detail}>
+      {phase.label}
+    </span>
+  );
 }
 
 function tenureLabel(years: number | null): string {
@@ -101,6 +110,7 @@ function TeamGrid({ teams, data, max }: { teams: Team[]; data: NBAData; max: num
     <div className="team-grid">
       {teams.map(t => {
         const total = t.totalCap ?? t.rosterSalary;
+        const phase = getTeamPhase(t.abbreviation, data);
         return (
           <Link key={t.abbreviation} className="team-card" href={`/team/${t.abbreviation}`} aria-label={`${t.name}の詳細`}>
             <div className="team-head">
@@ -110,6 +120,7 @@ function TeamGrid({ teams, data, max }: { teams: Team[]; data: NBAData; max: num
                 <h2>{t.name}</h2>
                 <span>{t.playerCount} players · {t.capSource}</span>
               </div>
+              {phase && <PhaseBadge phase={phase} />}
             </div>
             <div className="money">{yen(total)}</div>
             <div className="sub">

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { NBAData, Player, Team, Thresholds, DraftPickEntry, HistoricalSnapshot, FuturePickAsset } from '@/lib/types';
-import { yen, badgeClass, lineDifference, capScale } from '@/lib/utils';
+import { yen, badgeClass, lineDifference, capScale, getTeamPhase } from '@/lib/utils';
 import CapTrack from './CapTrack';
 
 type SortKey = 'jersey' | 'name' | 'position' | 'salary' | 'yearsRemaining' | 'tradeRestricted';
@@ -530,7 +530,10 @@ export default function TeamDetail({ team: t, players, data }: Props) {
             <div>
               <p className="eyebrow dark">TEAM CAP DETAIL</p>
               <h2>{t.name}</h2>
-              <span className={`badge ${badgeClass(t.apronStatus)}`}>{t.apronStatus}</span>
+              <div className="detail-badges">
+                <span className={`badge ${badgeClass(t.apronStatus)}`}>{t.apronStatus}</span>
+                {(() => { const ph = getTeamPhase(t.abbreviation, data); return ph ? <span className={`phase-badge phase-${ph.tier}`} title={ph.detail}>{ph.label}</span> : null; })()}
+              </div>
               {t.coach && <p className="coach-label">HC: {t.coach}</p>}
             </div>
           </div>
