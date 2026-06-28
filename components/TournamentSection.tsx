@@ -61,10 +61,14 @@ function MatchupBox({
   scoreTop?: string;
   scoreBot?: string;
 }) {
-  const hasScore = Boolean(scoreTop && scoreBot);
   const hasSeries = Boolean(series);
-  const topWon = (hasSeries && series!.winner === top?.abbr) || (hasScore && !hasSeries && Boolean(scoreTop));
-  const botWon = (hasSeries && series!.winner === bot?.abbr) || (hasScore && !hasSeries && Boolean(scoreBot));
+  const hasScore = Boolean(scoreTop && scoreBot);
+  const topPts = hasScore ? parseInt(scoreTop!) : 0;
+  const botPts = hasScore ? parseInt(scoreBot!) : 0;
+
+  const topWon = hasSeries ? series!.winner === top?.abbr : (hasScore ? topPts > botPts : false);
+  const botWon = hasSeries ? series!.winner === bot?.abbr : (hasScore ? botPts > topPts : false);
+  const decided = hasSeries || hasScore;
 
   let vsContent: React.ReactNode = 'vs';
   if (hasSeries) vsContent = <span className="bt-score">{series!.winsW}-{series!.winsL}</span>;
@@ -73,9 +77,9 @@ function MatchupBox({
   return (
     <div className="bracket-matchup">
       {label && <span className="bracket-matchup-label">{label}</span>}
-      <TeamPill entry={top} isWinner={topWon} isLoser={(hasSeries || hasScore) && !topWon && top != null} />
+      <TeamPill entry={top} isWinner={topWon} isLoser={decided && !topWon && top != null} />
       <div className="bracket-vs">{vsContent}</div>
-      <TeamPill entry={bot} isWinner={botWon} isLoser={(hasSeries || hasScore) && !botWon && bot != null} />
+      <TeamPill entry={bot} isWinner={botWon} isLoser={decided && !botWon && bot != null} />
     </div>
   );
 }
