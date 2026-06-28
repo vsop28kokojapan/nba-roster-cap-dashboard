@@ -871,6 +871,7 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
   text-align: center; font-size: 10px; color: #c0ccd8; font-weight: 700;
   padding: 3px 0; text-transform: uppercase; letter-spacing: .1em;
 }
+.bt-score { font-size: 12px; font-weight: 800; color: #3a5a7a; letter-spacing: .05em; }
 
 /* Playoff bracket */
 .playoff-bracket-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
@@ -888,14 +889,17 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
   color: #8aaec9; margin: 0 0 8px; padding-bottom: 6px;
   border-bottom: 2px solid #e8f0f8;
 }
-.playoff-finals {
-  grid-column: 1 / -1; margin-top: 20px;
-  background: linear-gradient(135deg, #f8f4e8, #fff8ec);
+/* Finals section (below East/West bracket) */
+.playoff-finals-section {
+  margin-top: 24px; background: linear-gradient(135deg, #f8f4e8, #fff8ec);
   border: 1px solid var(--gold); border-radius: 14px; padding: 20px;
-  max-width: 320px;
+  max-width: 340px;
 }
 .finals-label { color: #b07d00 !important; }
-.finals-note { font-size: 12px; color: #9a7a30; margin-top: 8px; }
+.champion-text {
+  font-size: 13px; color: #8a6400; margin: 10px 0 0;
+  text-align: center; font-style: italic;
+}
 
 /* Play-In */
 .playin-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
@@ -905,29 +909,39 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
 .playin-note { font-size: 11px; color: #8a9daf; margin: 8px 0 0; font-style: italic; }
 
 /* NBA Cup */
-.cup-section { max-width: 720px; }
+.cup-section { max-width: 900px; }
 .cup-hero {
-  display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px;
+  display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px;
   background: linear-gradient(135deg, #0a1e35, #0d2a4a);
   border-radius: 14px; padding: 20px; color: white;
 }
 .cup-trophy { font-size: 36px; flex-shrink: 0; }
 .cup-title { font-size: 16px; font-weight: 800; margin: 0 0 4px; }
 .cup-sub { font-size: 12px; color: #8ab2d0; margin: 0; line-height: 1.5; }
+.cup-champion-row {
+  display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.cup-champion-card {
+  display: flex; align-items: center; gap: 10px;
+  background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;
+  padding: 12px 16px;
+}
+.cup-champ-icon { font-size: 22px; }
+.cup-champ-label { font-size: 10px; color: #16a34a; text-transform: uppercase; font-weight: 700; letter-spacing: .08em; margin-right: 4px; }
 .cup-mvp-card {
   display: flex; align-items: center; gap: 12px;
   background: white; border: 1px solid var(--line); border-radius: 12px;
-  padding: 14px 18px; margin-bottom: 16px;
+  padding: 12px 16px;
 }
 .cup-mvp-icon { font-size: 24px; }
 .cup-mvp-label { font-size: 10px; color: #8a9daf; text-transform: uppercase; letter-spacing: .1em; margin: 0 0 2px; }
 .cup-mvp-name { font-size: 16px; font-weight: 800; margin: 0; }
-.cup-bracket-note {
-  background: #f4f7fb; border-radius: 10px; padding: 14px 16px;
-  font-size: 13px; color: #516276; line-height: 1.6;
-}
-.cup-bracket-note p { margin: 0 0 6px; }
-.cup-bracket-note p:last-child { margin-bottom: 0; }
+/* Cup bracket */
+.cup-bracket { display: flex; flex-direction: column; gap: 20px; }
+.cup-bracket-round { }
+.cup-matchups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.cup-matchup { display: flex; flex-direction: column; gap: 4px; }
+.cup-round-label { font-size: 9px; color: #8a9daf; text-transform: uppercase; letter-spacing: .08em; }
 .cup-note-sub { font-size: 11px; color: #9aadbe; font-style: italic; }
 .bracket-disclaimer { font-size: 11px; color: #9aadbe; margin-top: 20px; font-style: italic; }
 
