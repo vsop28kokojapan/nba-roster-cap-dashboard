@@ -6,67 +6,64 @@ import type { Thresholds, NBAData } from './types';
 export interface TeamPhase {
   label: string;
   tier: 'championship' | 'rising' | 'playoff' | 'bubble' | 'transition' | 'rebuild' | 'draft';
-  detail: string; // 根拠の一言説明
+  description: string;  // フェーズの意味説明
+  metrics: {
+    confRank: number;
+    avgAge: number;
+    ownPicks: number;
+    totalPicks: number;
+    isOverTax: boolean;
+    apronStatus: string;
+  };
 }
+
+const PHASE_DESCRIPTIONS: Record<TeamPhase['tier'], string> = {
+  championship: '優勝候補。上位シードを維持しながら高額のロスターを抱え、今シーズンの優勝を狙っているチーム。ベテランや実績あるスター中心の編成が多い。',
+  rising:       '急速に強くなっている若いチーム。上位シードにいながら平均年齢が低く、今後さらなる成長が期待される。数年以内に優勝争いに加わる可能性大。',
+  playoff:      '安定したプレーオフチーム。出場はほぼ確実で、シリーズを戦える戦力を持っている。ただし優勝候補とのギャップを埋めるための補強が課題。',
+  bubble:       'プレーイン出場権を争っている状況。わずかな勝敗の差で順位が変わる緊張感のある位置。シーズン後半の戦い方が鍵を握る。',
+  draft:        '将来のドラフト指名権を大量に確保し、資産の蓄積を優先しているチーム。高い指名順位でスーパースターを引き当てることを狙った長期戦略フェーズ。',
+  rebuild:      '若手選手の育成と成長を最優先にしているチーム。勝敗より経験と開発を重視し、数年後の競争力向上を目標にしている。',
+  transition:   'ロスターの再編と方向性の模索中。ベテランと若手が混在し、チームのビジョンがまだ固まっていない過渡期。補強や放出によって方向が変わる可能性がある。',
+};
 
 export function getTeamPhase(abbr: string, data: NBAData): TeamPhase | null {
   const team = data.teams.find(t => t.abbreviation === abbr);
   if (!team) return null;
 
-  // カンファレンス順位（1–15）
   const curStandings = data.standings?.[0];
   const rank =
     curStandings?.east.find(t => t.abbr === abbr)?.rank ??
     curStandings?.west.find(t => t.abbr === abbr)?.rank ??
     15;
 
-  // 平均年齢（給与のある選手のみ）
   const roster = data.players.filter(p => p.team === abbr && p.age != null);
   const avgAge =
     roster.length > 0 ? roster.reduce((s, p) => s + p.age!, 0) / roster.length : 26.5;
 
-  // 将来指名権（自前保有数 / 最大10本=5年×2巡）
-  const picks = data.futurePicks?.[abbr] ?? [];
-  const ownPicks = picks.filter(p => !p.from).length;
+  const allPicks = data.futurePicks?.[abbr] ?? [];
+  const ownPicks = allPicks.filter(p => !p.from).length;
+  const totalPicks = allPicks.length;
 
-  // キャップ状況
   const isOverTax =
     team.apronStatus.includes('タックス') || team.apronStatus.includes('エプロン');
   const isYoung = avgAge < 26.5;
 
-  // ── 優先度順に判定 ──
-  // 1. ドラフト重視：順位下位 + 自前指名権 8本以上
-  if (rank >= 10 && ownPicks >= 8) {
-    return { label: 'ドラフト重視', tier: 'draft', detail: `自前指名権 ${ownPicks}/10本保有・資産蓄積フェーズ` };
-  }
+  const metrics = { confRank: rank, avgAge, ownPicks, totalPicks, isOverTax, apronStatus: team.apronStatus };
 
-  // 2. 優勝争い：上位シード + 高給与 or ベテラン核
-  if (rank <= 4 && (isOverTax || !isYoung)) {
-    return { label: '優勝争い', tier: 'championship', detail: `カンファ${rank}位・${isOverTax ? '贅沢税超' : ''}ベテラン核` };
-  }
+  const make = (tier: TeamPhase['tier']): TeamPhase => ({
+    label: { championship: '優勝争い', rising: '急成長中', playoff: 'プレーオフ圏',
+             bubble: 'バブル圏', draft: 'ドラフト重視', rebuild: '再建中', transition: '移行期' }[tier],
+    tier, description: PHASE_DESCRIPTIONS[tier], metrics,
+  });
 
-  // 3. 急成長中：上位シード + 若いロスター
-  if (rank <= 6 && isYoung) {
-    return { label: '急成長中', tier: 'rising', detail: `カンファ${rank}位・平均年齢${avgAge.toFixed(1)}歳の若手主体` };
-  }
-
-  // 4. プレーオフ圏：確実なプレーオフ圏内
-  if (rank <= 8) {
-    return { label: 'プレーオフ圏', tier: 'playoff', detail: `カンファ${rank}位・プレーオフ確定圏` };
-  }
-
-  // 5. プレーオフバブル：プレーイン圏
-  if (rank <= 11) {
-    return { label: 'バブル圏', tier: 'bubble', detail: `カンファ${rank}位・プレーイン争い中` };
-  }
-
-  // 6. 再建中：下位 + 若手主体
-  if (isYoung) {
-    return { label: '再建中', tier: 'rebuild', detail: `平均年齢${avgAge.toFixed(1)}歳・若手育成フェーズ` };
-  }
-
-  // 7. 移行期：その他
-  return { label: '移行期', tier: 'transition', detail: `カンファ${rank}位・ロスター再編中` };
+  if (rank >= 10 && ownPicks >= 8) return make('draft');
+  if (rank <= 4 && (isOverTax || !isYoung)) return make('championship');
+  if (rank <= 6 && isYoung) return make('rising');
+  if (rank <= 8) return make('playoff');
+  if (rank <= 11) return make('bubble');
+  if (isYoung) return make('rebuild');
+  return make('transition');
 }
 
 export const yen = (n: number | null | undefined): string =>

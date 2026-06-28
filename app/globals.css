@@ -1370,3 +1370,67 @@ th.yr-col { font-size: 10px; color: #8a9daf; text-transform: uppercase; letter-s
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 2px;
 }
 .detail-badges .phase-badge { margin-left: 0; }
+
+/* ── フェーズバッジ ポップオーバー ── */
+.phase-badge-wrap {
+  position: relative; display: inline-block;
+}
+.phase-badge-wrap .phase-badge {
+  cursor: pointer; user-select: none;
+  transition: opacity .15s;
+}
+.phase-badge-wrap .phase-badge:hover { opacity: .8; }
+.phase-badge-arrow { font-size: 9px; opacity: .7; }
+
+.phase-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 200;
+  width: 270px;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  padding: 16px;
+  animation: pop-in .15s ease;
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ポップオーバーが左端のカードで画面外に出ないよう反転 */
+.team-card:first-child .phase-popover,
+.team-card:nth-child(3n+1) .phase-popover {
+  right: auto; left: 0;
+}
+
+.phase-pop-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.phase-pop-subtitle {
+  font-size: 11px; color: #8a9aaa; font-weight: 500;
+}
+.phase-pop-desc {
+  font-size: 12.5px; line-height: 1.7; color: #3a4a5a;
+  margin: 0 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.phase-pop-metrics {
+  display: grid; gap: 7px;
+}
+.phase-metric {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px;
+}
+.pm-key { color: #718096; }
+.pm-val { font-weight: 700; color: #1a202c; }
+
+.phase-pop-note {
+  font-size: 10px; color: #a0aec0; text-align: right;
+  margin: 12px 0 0; padding-top: 10px;
+  border-top: 1px solid #edf2f7;
+}

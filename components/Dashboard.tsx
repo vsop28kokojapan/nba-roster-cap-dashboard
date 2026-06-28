@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import type { NBAData, Player, Team, Transaction } from '@/lib/types';
 import { yen, million, fmtDate, badgeClass, distanceText, lineDifference, capScale, getTeamPhase } from '@/lib/utils';
-import type { TeamPhase } from '@/lib/utils';
+import PhaseBadge from './PhaseBadge';
 import CapTrack from './CapTrack';
 import ThresholdCards from './ThresholdCards';
 import RuleGuide from './RuleGuide';
@@ -50,13 +50,6 @@ function Badge({ status }: { status: string }) {
   return <span className={`badge ${badgeClass(status)}`}>{status}</span>;
 }
 
-function PhaseBadge({ phase }: { phase: TeamPhase }) {
-  return (
-    <span className={`phase-badge phase-${phase.tier}`} title={phase.detail}>
-      {phase.label}
-    </span>
-  );
-}
 
 function tenureLabel(years: number | null): string {
   if (years == null) return '—';
