@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { NBAData, Player, Team, Thresholds, DraftPickEntry, HistoricalSnapshot } from '@/lib/types';
+import { NBAData, Player, Team, Thresholds, DraftPickEntry, HistoricalSnapshot, FuturePickAsset } from '@/lib/types';
 import { yen, badgeClass, lineDifference, capScale } from '@/lib/utils';
 import CapTrack from './CapTrack';
 
@@ -301,6 +301,125 @@ function DraftPicksSection({ picks, season }: { picks: DraftPickEntry[]; season:
   );
 }
 
+// ── Future draft picks ─────────────────────────────────────────────────────
+
+function PickTradeModal({ pick, onClose }: { pick: FuturePickAsset; onClose: () => void }) {
+  return (
+    <div className="drawer-overlay" onClick={onClose}>
+      <div className="pick-modal" onClick={e => e.stopPropagation()}>
+        <div className="pick-modal-header">
+          <div>
+            <span className="pick-modal-round">{pick.round === 1 ? '1巡目' : '2巡目'} 指名権</span>
+            <span className="pick-modal-year">{pick.year}年</span>
+          </div>
+          <button className="drawer-close" onClick={onClose} aria-label="閉じる">✕</button>
+        </div>
+        <div className="pick-modal-body">
+          <div className="pick-modal-meta">
+            <div className="pm-row">
+              <span className="pm-label">元保有チーム</span>
+              <span className="pm-value">{pick.from}</span>
+            </div>
+            {pick.protection && (
+              <div className="pm-row">
+                <span className="pm-label">保護条件</span>
+                <span className="pm-value pm-protection">{pick.protection}</span>
+              </div>
+            )}
+            {pick.trade && (
+              <div className="pm-row">
+                <span className="pm-label">トレード日</span>
+                <span className="pm-value">{pick.trade.date}</span>
+              </div>
+            )}
+          </div>
+          {pick.trade?.descriptionJa && (
+            <p className="pm-description">{pick.trade.descriptionJa}</p>
+          )}
+          {pick.trade?.espnUrl && (
+            <a
+              className="pm-espn-link"
+              href={pick.trade.espnUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ESPN記事を見る →
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FutureDraftPicksSection({ abbr }: { abbr: string }) {
+  const [picks, setPicks] = useState<FuturePickAsset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPick, setSelectedPick] = useState<FuturePickAsset | null>(null);
+
+  useEffect(() => {
+    fetch('/draft-picks.json', { cache: 'no-store' })
+      .then(r => r.json())
+      .then((d: Record<string, FuturePickAsset[]>) => {
+        setPicks(d[abbr] ?? []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [abbr]);
+
+  if (loading) return (
+    <section className="future-picks-section">
+      <h3>将来の保有指名権</h3>
+      <p className="fp-loading">読み込み中…</p>
+    </section>
+  );
+
+  if (picks.length === 0) return null;
+
+  const years = [...new Set(picks.map(p => p.year))].sort();
+
+  return (
+    <section className="future-picks-section">
+      <h3>将来の保有指名権</h3>
+      <div className="fp-years">
+        {years.map(year => {
+          const yearPicks = picks.filter(p => p.year === year).sort((a, b) => a.round - b.round);
+          return (
+            <div key={year} className="fp-year-col">
+              <div className="fp-year-label">{year}</div>
+              {yearPicks.map((pick, i) => {
+                const isOwn = !pick.from;
+                const hasDetail = Boolean(pick.trade);
+                return (
+                  <div
+                    key={i}
+                    className={`fp-card${isOwn ? ' fp-own' : ' fp-acquired'}${hasDetail ? ' fp-clickable' : ''}`}
+                    onClick={hasDetail ? () => setSelectedPick(pick) : undefined}
+                    role={hasDetail ? 'button' : undefined}
+                  >
+                    <span className="fp-round-badge">{pick.round === 1 ? '1巡' : '2巡'}</span>
+                    {isOwn
+                      ? <span className="fp-own-label">自チーム</span>
+                      : <span className="fp-from-label">← {pick.from}</span>
+                    }
+                    {pick.protection && (
+                      <span className="fp-protection-badge">{pick.protection}</span>
+                    )}
+                    {hasDetail && <span className="fp-detail-hint">詳細 ▾</span>}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+      {selectedPick && (
+        <PickTradeModal pick={selectedPick} onClose={() => setSelectedPick(null)} />
+      )}
+    </section>
+  );
+}
+
 // ── Stats fetch ────────────────────────────────────────────────────────────
 
 interface PlayerStats { pts: number | null; reb: number | null; ast: number | null; stl: number | null; blk: number | null }
@@ -459,6 +578,7 @@ export default function TeamDetail({ team: t, players, data }: Props) {
           />
         )}
 
+        <FutureDraftPicksSection abbr={t.abbreviation} />
         <DraftPicksSection picks={data.draftPicks?.[t.abbreviation] ?? []} season={data.meta.season} />
 
         {/* Salary tier legend */}

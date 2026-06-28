@@ -1226,3 +1226,120 @@ th.yr-col { font-size: 10px; color: #8a9daf; text-transform: uppercase; letter-s
   display: inline-block; width: 4px; height: 12px;
   background: #e8aa21; border-radius: 2px; margin-left: 8px;
 }
+
+/* ── Future draft picks section ── */
+.future-picks-section {
+  margin: 28px 0;
+}
+.future-picks-section h3 {
+  font-size: 15px; font-weight: 700; color: var(--ink);
+  margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.fp-loading {
+  color: #8a9fb0; font-size: 13px;
+}
+.fp-years {
+  display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px;
+}
+.fp-year-col {
+  min-width: 110px; flex-shrink: 0;
+}
+.fp-year-label {
+  font-size: 13px; font-weight: 800; color: #4a6278;
+  padding: 0 0 7px; text-align: center;
+  border-bottom: 2px solid #dce5ef; margin-bottom: 8px;
+}
+.fp-card {
+  background: #fff; border: 1.5px solid #dce5ef;
+  border-radius: 8px; padding: 8px 10px;
+  margin-bottom: 7px; min-height: 54px;
+  display: flex; flex-direction: column; gap: 4px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.fp-card.fp-acquired {
+  border-color: #0a6fc2; background: #f0f6ff;
+}
+.fp-card.fp-clickable {
+  cursor: pointer;
+}
+.fp-card.fp-clickable:hover {
+  border-color: #0050a0; box-shadow: 0 2px 8px rgba(10,111,194,0.18);
+}
+.fp-round-badge {
+  font-size: 11px; font-weight: 700;
+  background: #e8edf2; color: #4a6278;
+  padding: 2px 6px; border-radius: 4px; align-self: flex-start;
+}
+.fp-card.fp-acquired .fp-round-badge {
+  background: #d0e4f8; color: #0050a0;
+}
+.fp-own-label {
+  font-size: 11px; color: #9ab0c4;
+}
+.fp-from-label {
+  font-size: 12px; font-weight: 700; color: #0a6fc2;
+}
+.fp-protection-badge {
+  font-size: 10px; color: #c85008;
+  background: #fff3eb; border: 1px solid #f4b07c;
+  border-radius: 4px; padding: 1px 5px; align-self: flex-start;
+}
+.fp-detail-hint {
+  font-size: 10px; color: #7ba3c8; margin-top: 2px;
+  align-self: flex-end;
+}
+
+/* ── Pick trade details modal ── */
+.pick-modal {
+  background: #fff; border-radius: 16px;
+  width: min(480px, 92vw); margin: auto;
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  overflow: hidden; z-index: 400;
+}
+.pick-modal-header {
+  background: var(--ink); color: #fff;
+  padding: 16px 20px; display: flex;
+  align-items: center; justify-content: space-between; gap: 12px;
+}
+.pick-modal-round {
+  font-size: 16px; font-weight: 800; margin-right: 10px;
+}
+.pick-modal-year {
+  font-size: 14px; color: #8aabcf;
+}
+.pick-modal-body {
+  padding: 20px;
+}
+.pick-modal-meta {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-bottom: 16px;
+}
+.pm-row {
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.pm-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  color: #9ab0c4; min-width: 90px; padding-top: 2px;
+}
+.pm-value {
+  font-size: 14px; font-weight: 600; color: var(--ink); flex: 1;
+}
+.pm-protection {
+  color: #c85008;
+}
+.pm-description {
+  font-size: 13px; line-height: 1.7; color: #3a5268;
+  background: #f4f8fc; border-radius: 8px; padding: 12px 14px;
+  margin: 0 0 16px;
+}
+.pm-espn-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: #0a6fc2;
+  text-decoration: none; padding: 8px 14px;
+  border: 1.5px solid #0a6fc2; border-radius: 8px;
+  transition: background 0.15s;
+}
+.pm-espn-link:hover {
+  background: #e8f2fd;
+}

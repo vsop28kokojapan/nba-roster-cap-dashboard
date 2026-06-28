@@ -149,6 +149,19 @@ export interface HistoricalPlayer {
   contractType: ContractType;
 }
 
+export interface FuturePickAsset {
+  year: number;
+  round: number;
+  from: string | null;
+  protection: string | null;
+  trade: {
+    date: string;
+    teams: string[];
+    descriptionJa: string;
+    espnUrl: string;
+  } | null;
+}
+
 export interface HistoricalSnapshot {
   season: string;
   fetchedAt: string;

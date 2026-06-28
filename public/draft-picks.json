@@ -1,0 +1,2175 @@
+{
+  "_meta": {
+    "updatedAt": "2026-06-28",
+    "note": "手動管理ファイル。トレードが発生したら編集してください。from: null は自チーム保有を意味します。\n※ 上記はKnown pick situations as of Aug 2025。2025-26シーズン中のトレードは手動で反映してください。"
+  },
+  "ATL": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "BOS": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "BKN": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "CHA": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "CHI": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "CLE": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "DAL": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "DEN": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "DET": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "GS": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "HOU": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "IND": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "LAC": [
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "LAL": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "MEM": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "MIA": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "MIL": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "MIN": [
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "NO": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "NY": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "OKC": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 1,
+      "from": "LAC",
+      "protection": "Top-12プロテクト",
+      "trade": {
+        "date": "2019-07-06",
+        "teams": [
+          "OKC",
+          "LAC"
+        ],
+        "descriptionJa": "ポール・ジョージのトレード。LAクリッパーズがポール・ジョージを獲得し、OKCはLACの2027年1巡目指名権（Top-12プロテクト）などを受け取った。",
+        "espnUrl": "https://www.espn.com/nba/story/_/id/27106867"
+      }
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "ORL": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "PHI": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "PHX": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "POR": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "SA": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "SAC": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "TOR": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "UTAH": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": "MIN",
+      "protection": "Top-5プロテクト",
+      "trade": {
+        "date": "2022-07-06",
+        "teams": [
+          "MIN",
+          "UTAH"
+        ],
+        "descriptionJa": "ルーディ・ゴベールのトレード。ミネソタ・ティンバーウルブズがゴベール、マリク・ビースリーらを獲得。ユタ・ジャズはMINの2027年1巡目指名権（Top-5プロテクト）を含む複数の指名権を受け取った。",
+        "espnUrl": "https://www.espn.com/nba/story/_/id/34218978/rudy-gobert-traded-utah-jazz-minnesota-timberwolves"
+      }
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ],
+  "WSH": [
+    {
+      "year": 2027,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2027,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2028,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2029,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2030,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 1,
+      "from": null,
+      "protection": null,
+      "trade": null
+    },
+    {
+      "year": 2031,
+      "round": 2,
+      "from": null,
+      "protection": null,
+      "trade": null
+    }
+  ]
+}
