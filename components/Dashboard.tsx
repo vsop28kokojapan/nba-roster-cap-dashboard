@@ -113,13 +113,15 @@ function TeamGrid({ teams, data, max }: { teams: Team[]; data: NBAData; max: num
                 <h2>{t.name}</h2>
                 <span>{t.playerCount} players · {t.capSource}</span>
               </div>
+            </div>
+            <div className="team-badge-row">
+              <Badge status={t.apronStatus} />
               {phase && <PhaseBadge phase={phase} />}
             </div>
             <div className="money">{yen(total)}</div>
             <div className="sub">
               総キャップ配賦額{t.deadCap != null ? ` · デッド ${yen(t.deadCap)}` : ''}
             </div>
-            <Badge status={t.apronStatus} />
             <p className="distance">{distanceText(total, data.thresholds)}</p>
             <CapTrack total={total} color={t.color} thresholds={data.thresholds} max={max} />
             <span className="open-detail">詳細を見る ↗</span>
