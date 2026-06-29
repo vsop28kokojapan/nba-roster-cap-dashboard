@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { NBAData, Player, Team, Transaction } from '@/lib/types';
 import { yen, million, fmtDate, badgeClass, distanceText, lineDifference, capScale, getTeamPhase } from '@/lib/utils';
 import PhaseBadge from './PhaseBadge';
+import AdBanner from './AdBanner';
 import CapTrack from './CapTrack';
 import ThresholdCards from './ThresholdCards';
 import RuleGuide from './RuleGuide';
@@ -411,6 +412,7 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
         {tab === 'teams' && (
           <section className="panel active">
             <CapChartSection teams={filteredTeams} data={data} max={max} />
+            <AdBanner slot="1234567890" format="horizontal" style={{ minHeight: 90, marginBottom: 16 }} />
             <TeamGrid teams={filteredTeams} data={data} max={max} />
           </section>
         )}
@@ -437,6 +439,8 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
             }
           </section>
         )}
+
+        <AdBanner slot="0987654321" format="auto" style={{ minHeight: 90, margin: '0 max(24px, calc((100vw - 1440px) / 2)) 12px' }} />
 
         <p className="footnote">
           {data.meta.notes.join(' ')}

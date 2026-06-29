@@ -289,6 +289,20 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
 .trade details p { margin: 5px 0 0; line-height: 1.5; }
 .trade summary { cursor: pointer; font-weight: 700; font-size: 11px; color: #245a9b; }
 
+/* ── ad banner ── */
+.ad-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border: 1px dashed #c8d4de;
+  border-radius: 8px;
+  color: #9aacba;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
 /* ── footnote ── */
 .footnote { font-size: 11px; color: #758494; line-height: 1.7; margin-top: 20px; padding: 0 max(24px, calc((100vw - 1440px) / 2)); }
 
