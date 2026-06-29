@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-const PUB_ID = 'ca-pub-XXXXXXXXXXXXXXXXX'; // ← AdSense取得後にここを差し替える
+const PUB_ID = 'ca-pub-3095444700234869';
 
 type AdFormat = 'auto' | 'horizontal' | 'rectangle';
 

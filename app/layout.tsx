@@ -4,7 +4,7 @@ import Script from 'next/script';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
-const PUB_ID = 'ca-pub-XXXXXXXXXXXXXXXXX'; // ← AdSense取得後にここを差し替える
+const PUB_ID = 'ca-pub-3095444700234869';
 
 export const metadata: Metadata = {
   title: 'NBA Roster & Cap Board',
