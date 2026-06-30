@@ -97,3 +97,99 @@ export function lineDifference(total: number, value: number): string {
   const d = total - value;
   return d >= 0 ? `${million(d)} 超過` : `あと ${million(-d)}`;
 }
+
+// ── チームの「使える武器」（例外条項） ──────────────────────────────────────
+// 現在のキャップ状況（cap / tax / 第1・第2エプロン）から利用可否を判定。
+// 金額はCBAの規定額をサラリーキャップに対する比率で概算したもの。
+
+export interface TeamException {
+  key: string;
+  label: string;
+  amount: number | null;
+  available: boolean;
+  note: string;
+}
+
+const NT_MLE_RATIO = 0.0915;   // Non-Taxpayer MLE
+const TAX_MLE_RATIO = 0.037;   // Taxpayer MLE
+const ROOM_MLE_RATIO = 0.057;  // Room MLE
+const BAE_RATIO = 0.033;       // Bi-Annual Exception
+
+export function getTeamExceptions(team: { totalCap: number | null; rosterSalary: number }, t: Thresholds): TeamException[] {
+  const total = team.totalCap ?? team.rosterSalary;
+  const overCap = total > t.salaryCap;
+  const overFirstApron = total > t.firstApron;
+  const overSecondApron = total > t.secondApron;
+
+  const exceptions: TeamException[] = [];
+
+  if (!overCap) {
+    exceptions.push({
+      key: 'capRoom',
+      label: 'キャップスペース',
+      amount: t.salaryCap - total,
+      available: true,
+      note: 'FAと直接契約できる枠。最も自由度が高い補強手段。',
+    });
+    exceptions.push({
+      key: 'roomMle',
+      label: 'ルームMLE',
+      amount: t.salaryCap * ROOM_MLE_RATIO,
+      available: true,
+      note: 'キャップ内運用チームが使える小型のミッドレベル例外。',
+    });
+  } else if (!overFirstApron) {
+    exceptions.push({
+      key: 'ntMle',
+      label: 'Non-Taxpayer MLE',
+      amount: t.salaryCap * NT_MLE_RATIO,
+      available: true,
+      note: '中堅選手獲得の主力ツール。使用すると第1エプロンでハードキャップ。',
+    });
+    exceptions.push({
+      key: 'bae',
+      label: 'Bi-Annual Exception',
+      amount: t.salaryCap * BAE_RATIO,
+      available: true,
+      note: '2年に1度だけ使える追加の契約枠。',
+    });
+  } else if (!overSecondApron) {
+    exceptions.push({
+      key: 'taxMle',
+      label: 'Taxpayer MLE',
+      amount: t.salaryCap * TAX_MLE_RATIO,
+      available: true,
+      note: '第1エプロン超過チーム用の縮小版MLE。使用すると第2エプロンでハードキャップ。',
+    });
+  } else {
+    exceptions.push({
+      key: 'none',
+      label: 'MLE / BAE',
+      amount: null,
+      available: false,
+      note: '第2エプロンを超過しているため、ミッドレベル例外・隔年例外は一切使用不可。',
+    });
+  }
+
+  exceptions.push({
+    key: 'signAndTrade',
+    label: 'サイン&トレード受け入れ',
+    amount: null,
+    available: !overFirstApron,
+    note: overFirstApron
+      ? '第1エプロン超過のため、サイン&トレードでの選手受け入れ不可。'
+      : '他チームとのサイン&トレードで選手を獲得可能。',
+  });
+
+  exceptions.push({
+    key: 'aggregate',
+    label: '複数契約合算トレード',
+    amount: null,
+    available: !overSecondApron,
+    note: overSecondApron
+      ? '第2エプロン超過のため、2人以上の給与を合算してトレードに使うことは不可。'
+      : '複数選手の給与を合算してトレードの受け皿にできる。',
+  });
+
+  return exceptions;
+}

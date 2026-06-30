@@ -6,6 +6,7 @@ import { NBAData, Player, Team, Thresholds, DraftPickEntry, HistoricalSnapshot, 
 import { yen, badgeClass, lineDifference, capScale, getTeamPhase } from '@/lib/utils';
 import PhaseBadge from './PhaseBadge';
 import CapTrack from './CapTrack';
+import TeamExceptions from './TeamExceptions';
 
 type SortKey = 'jersey' | 'name' | 'position' | 'salary' | 'yearsRemaining' | 'tradeRestricted';
 type SortDir = 'asc' | 'desc';
@@ -560,6 +561,8 @@ export default function TeamDetail({ team: t, players, data }: Props) {
             ))}
           </div>
         </section>
+
+        <TeamExceptions team={t} thresholds={data.thresholds} />
 
         {/* Cap Projection Chart */}
         {contractYearCols.length > 0 && (
