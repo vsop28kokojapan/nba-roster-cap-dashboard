@@ -551,6 +551,8 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
 .detail-head-left > img { width: 78px; height: 78px; object-fit: contain; flex-shrink: 0; }
 .detail-head h2 { font-size: 30px; margin: 2px 0 5px; }
 .detail-head .badge { margin-top: 2px; }
+.detail-head-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+
 /* History mini chart */
 .history-mini-card {
   background: #f6faff; border: 1px solid #d8e8f4; border-radius: 10px;
@@ -707,6 +709,62 @@ th { position: sticky; top: 0; background: #0a2039; color: #e7f1fb; font-size: 1
 }
 .glossary-item dt { font-size: 14px; font-weight: 900; color: var(--ink); margin: 0 0 6px; }
 .glossary-item dd { margin: 0; font-size: 12.5px; color: #44566a; line-height: 1.7; }
+
+/* ── glossary modal ── */
+.glossary-modal-trigger {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.glossary-modal-trigger:hover { border-color: var(--gold); }
+.glossary-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(10,25,49,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.glossary-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+.glossary-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 0;
+}
+.glossary-modal-header h3 { margin: 0; font-size: 18px; color: var(--navy); }
+.glossary-modal-close {
+  background: #f3f6fa;
+  border-radius: 50%;
+  width: 30px; height: 30px;
+  font-size: 13px;
+  padding: 0;
+  color: #6c7d8f;
+}
+.glossary-modal-close:hover { background: #e7eef7; }
+.glossary-modal .glossary-toolbar { padding: 14px 20px 0; margin: 0; }
+.glossary-modal-body { padding: 16px 20px 22px; overflow-y: auto; }
+@media (max-width: 640px) {
+  .glossary-modal-backdrop { padding: 0; align-items: flex-end; }
+  .glossary-modal { max-width: 100%; max-height: 88vh; border-radius: 16px 16px 0 0; }
+}
 
 /* ── sortable table ── */
 .sortable-table th { padding: 0; }

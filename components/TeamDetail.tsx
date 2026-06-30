@@ -7,6 +7,7 @@ import { yen, badgeClass, lineDifference, capScale, getTeamPhase } from '@/lib/u
 import PhaseBadge from './PhaseBadge';
 import CapTrack from './CapTrack';
 import TeamExceptions from './TeamExceptions';
+import GlossaryModal from './GlossaryModal';
 
 type SortKey = 'jersey' | 'name' | 'position' | 'salary' | 'yearsRemaining' | 'tradeRestricted';
 type SortDir = 'asc' | 'desc';
@@ -539,7 +540,10 @@ export default function TeamDetail({ team: t, players, data }: Props) {
               {t.coach && <p className="coach-label">HC: {t.coach}</p>}
             </div>
           </div>
-          <HistoryMiniChart abbr={t.abbreviation} />
+          <div className="detail-head-right">
+            <GlossaryModal />
+            <HistoryMiniChart abbr={t.abbreviation} />
+          </div>
         </div>
 
         <div className="detail-metrics">
