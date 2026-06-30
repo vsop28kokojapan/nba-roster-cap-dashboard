@@ -834,6 +834,15 @@ thead tr th:last-child { border-top-right-radius: 11px; }
   outline: 2px solid #68a9ef;
   outline-offset: -2px;
 }
+.sortable-table th.stats-col {
+  padding: 12px 13px;
+  vertical-align: middle;
+  line-height: 1.2;
+}
+.sortable-table th.stats-col .col-tip {
+  display: inline-block;
+  line-height: 1.2;
+}
 .sortable-table thead tr th:first-child button { border-top-left-radius: 11px; }
 .sortable-table thead tr th:last-child button { border-top-right-radius: 11px; }
 .col-tip { position: relative; cursor: help; border-bottom: 1px dotted #6c8aa8; }
