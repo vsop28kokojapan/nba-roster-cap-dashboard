@@ -629,15 +629,15 @@ export default function TeamDetail({ team: t, players, data }: Props) {
                         <button onClick={() => toggleSort('yearsRemaining')}>残年数 {sortMark('yearsRemaining')}</button>
                       </th>
                       <th>
-                        <button onClick={() => toggleSort('tradeRestricted')}>TR制限 {sortMark('tradeRestricted')}</button>
+                        <button className="col-tip" data-tip="トレード成立後、一定期間は別チームへ再トレードできない制限（CBA上のルール）" onClick={() => toggleSort('tradeRestricted')}>TR制限 {sortMark('tradeRestricted')}</button>
                       </th>
                     </>
                   )}
-                  <th className="stats-col">PTS</th>
-                  <th className="stats-col">REB</th>
-                  <th className="stats-col">AST</th>
-                  <th className="stats-col">STL</th>
-                  <th className="stats-col">BLK</th>
+                  <th className="stats-col"><span className="col-tip" data-tip="平均得点（1試合あたり）">PTS</span></th>
+                  <th className="stats-col"><span className="col-tip" data-tip="平均リバウンド数（1試合あたり）">REB</span></th>
+                  <th className="stats-col"><span className="col-tip" data-tip="平均アシスト数（1試合あたり）">AST</span></th>
+                  <th className="stats-col"><span className="col-tip" data-tip="平均スティール数（1試合あたり）">STL</span></th>
+                  <th className="stats-col"><span className="col-tip" data-tip="平均ブロック数（1試合あたり）">BLK</span></th>
                 </tr>
               </thead>
               <tbody>
