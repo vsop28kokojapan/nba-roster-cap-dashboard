@@ -676,6 +676,7 @@ export default function TeamDetail({ team: t, players, data }: Props) {
                               {p.profile
                                 ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
                                 : p.name}
+                              {p.age != null && <span className="player-age">{p.age}歳</span>}
                               {(awardBadges.get(p.id) ?? []).map(b => (
                                 <span key={b.label + b.season} className="player-badge">
                                   <span className="pb-icon">{b.icon}</span>

@@ -1408,6 +1408,7 @@ tr.tier-near { background: #fff9f4; }
 .sal-cell.tier-low  b { color: #2e7a50; }
 
 .tier-label-inline { font-size: 10px; color: #9ab0c0; letter-spacing: .02em; margin-top: 2px; display: block; }
+.player-age { font-size: 11px; font-weight: 600; color: #8a9daf; }
 
 /* Tier legend bar */
 .tier-legend {
