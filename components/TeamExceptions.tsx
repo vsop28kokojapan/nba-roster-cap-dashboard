@@ -1,5 +1,6 @@
 import type { Thresholds } from '@/lib/types';
 import { getTeamExceptions, million } from '@/lib/utils';
+import GlossaryPopover from './GlossaryPopover';
 
 interface Props {
   team: { totalCap: number | null; rosterSalary: number };
@@ -18,7 +19,13 @@ export default function TeamExceptions({ team, thresholds }: Props) {
           <div key={ex.key} className={`te-card ${ex.available ? 'te-available' : 'te-locked'}`}>
             <div className="te-card-head">
               <span className="te-icon">{ex.available ? '✓' : '✕'}</span>
-              <span className="te-label">{ex.label}</span>
+              {ex.glossaryTerm ? (
+                <GlossaryPopover term={ex.glossaryTerm}>
+                  <span className="te-label">{ex.label}</span>
+                </GlossaryPopover>
+              ) : (
+                <span className="te-label">{ex.label}</span>
+              )}
             </div>
             {ex.amount != null && <strong className="te-amount">{million(ex.amount)}</strong>}
             <p className="te-note">{ex.note}</p>

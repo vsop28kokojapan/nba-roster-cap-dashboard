@@ -105,6 +105,7 @@ export function lineDifference(total: number, value: number): string {
 export interface TeamException {
   key: string;
   label: string;
+  glossaryTerm: string | null;
   amount: number | null;
   available: boolean;
   note: string;
@@ -127,6 +128,7 @@ export function getTeamExceptions(team: { totalCap: number | null; rosterSalary:
     exceptions.push({
       key: 'capRoom',
       label: 'キャップスペース',
+      glossaryTerm: 'キャップスペース',
       amount: t.salaryCap - total,
       available: true,
       note: 'FAと直接契約できる枠。最も自由度が高い補強手段。',
@@ -134,6 +136,7 @@ export function getTeamExceptions(team: { totalCap: number | null; rosterSalary:
     exceptions.push({
       key: 'roomMle',
       label: 'ルームMLE',
+      glossaryTerm: 'Room MLE',
       amount: t.salaryCap * ROOM_MLE_RATIO,
       available: true,
       note: 'キャップ内運用チームが使える小型のミッドレベル例外。',
@@ -142,6 +145,7 @@ export function getTeamExceptions(team: { totalCap: number | null; rosterSalary:
     exceptions.push({
       key: 'ntMle',
       label: 'Non-Taxpayer MLE',
+      glossaryTerm: 'Non-Taxpayer MLE',
       amount: t.salaryCap * NT_MLE_RATIO,
       available: true,
       note: '中堅選手獲得の主力ツール。使用すると第1エプロンでハードキャップ。',
@@ -149,6 +153,7 @@ export function getTeamExceptions(team: { totalCap: number | null; rosterSalary:
     exceptions.push({
       key: 'bae',
       label: 'Bi-Annual Exception',
+      glossaryTerm: 'Bi-Annual例外（BAE）',
       amount: t.salaryCap * BAE_RATIO,
       available: true,
       note: '2年に1度だけ使える追加の契約枠。',
@@ -157,6 +162,7 @@ export function getTeamExceptions(team: { totalCap: number | null; rosterSalary:
     exceptions.push({
       key: 'taxMle',
       label: 'Taxpayer MLE',
+      glossaryTerm: 'Taxpayer MLE',
       amount: t.salaryCap * TAX_MLE_RATIO,
       available: true,
       note: '第1エプロン超過チーム用の縮小版MLE。使用すると第2エプロンでハードキャップ。',
@@ -165,6 +171,7 @@ export function getTeamExceptions(team: { totalCap: number | null; rosterSalary:
     exceptions.push({
       key: 'none',
       label: 'MLE / BAE',
+      glossaryTerm: null,
       amount: null,
       available: false,
       note: '第2エプロンを超過しているため、ミッドレベル例外・隔年例外は一切使用不可。',
@@ -174,6 +181,7 @@ export function getTeamExceptions(team: { totalCap: number | null; rosterSalary:
   exceptions.push({
     key: 'signAndTrade',
     label: 'サイン&トレード受け入れ',
+    glossaryTerm: 'サイン&トレード',
     amount: null,
     available: !overFirstApron,
     note: overFirstApron
@@ -184,6 +192,7 @@ export function getTeamExceptions(team: { totalCap: number | null; rosterSalary:
   exceptions.push({
     key: 'aggregate',
     label: '複数契約合算トレード',
+    glossaryTerm: '複数契約合算トレード',
     amount: null,
     available: !overSecondApron,
     note: overSecondApron
