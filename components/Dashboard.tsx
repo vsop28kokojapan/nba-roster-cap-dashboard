@@ -340,9 +340,12 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
             {data.meta.season} · 更新 {new Date(data.meta.updatedAt).toLocaleString('ja-JP')} · {data.players.length}選手
           </p>
         </div>
-        <button onClick={handleRefresh} disabled={refreshing} style={{ whiteSpace: 'nowrap' }}>
-          {refreshing ? '更新中…' : '↻ データを更新'}
-        </button>
+        <div className="header-actions">
+          <Link className="glossary-link" href="/glossary">📖 用語集</Link>
+          <button onClick={handleRefresh} disabled={refreshing} style={{ whiteSpace: 'nowrap' }}>
+            {refreshing ? '更新中…' : '↻ データを更新'}
+          </button>
+        </div>
       </header>
 
       <main>
