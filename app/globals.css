@@ -1508,8 +1508,9 @@ th.yr-col { font-size: 10px; color: #8a9daf; text-transform: uppercase; letter-s
 }
 .award-card:hover { box-shadow: 0 3px 12px #0000001a; }
 .award-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.award-photo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #e8eef5; flex-shrink: 0; }
 .award-label { font-size: 11px; color: #7a8fa0; margin: 0 0 2px; text-transform: uppercase; letter-spacing: .05em; }
-.award-name { font-size: 15px; font-weight: 700; color: var(--ink); margin: 0; }
+.award-name { font-size: 15px; font-weight: 700; color: var(--ink); margin: 0; display: flex; align-items: center; gap: 6px; }
 
 .award-teams { display: flex; flex-direction: column; gap: 12px; }
 .award-team-row {
@@ -1518,9 +1519,12 @@ th.yr-col { font-size: 10px; color: #8a9daf; text-transform: uppercase; letter-s
 .award-team-label { display: block; font-size: 11px; color: #7a8fa0; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; font-weight: 700; }
 .award-team-members { display: flex; flex-wrap: wrap; gap: 6px; }
 .award-member {
-  background: #f0f5fb; border: 1px solid #d0dde8; border-radius: 6px;
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #f0f5fb; border: 1px solid #d0dde8; border-radius: 16px;
   padding: 3px 10px; font-size: 13px; font-weight: 500; color: var(--ink);
 }
+.award-member:has(.award-member-photo) { padding-left: 3px; }
+.award-member-photo { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; background: #e0e8f0; flex-shrink: 0; }
 
 /* ── Standings ── */
 .standings-wrap { margin-top: 8px; }

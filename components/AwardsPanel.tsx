@@ -54,6 +54,7 @@ export default function AwardsPanel({ data }: { data: NBAData }) {
   const currentStandings = data.standings.find(s => s.season === selectedSeason);
 
   const seasons = data.awards.map(a => a.season);
+  const playerById = new Map(data.players.map(p => [p.id, p]));
 
   return (
     <div className="awards-panel">
@@ -79,12 +80,19 @@ export default function AwardsPanel({ data }: { data: NBAData }) {
                 {AWARD_LABELS.filter(a => !a.isArray).map(({ key, label, icon }) => {
                   const entry = currentAwards[key] as import('@/lib/types').AwardEntry | undefined;
                   if (!entry) return null;
+                  const player = playerById.get(entry.athleteId);
                   return (
                     <div key={key} className="award-card">
-                      <span className="award-icon">{icon}</span>
+                      {player?.headshot
+                        ? /* eslint-disable-next-line @next/next/no-img-element */
+                          <img className="award-photo" src={player.headshot} alt="" width={36} height={36} />
+                        : <span className="award-icon">{icon}</span>}
                       <div>
-                        <p className="award-label">{label}</p>
-                        <p className="award-name">{entry.athleteName}</p>
+                        <p className="award-label">{icon} {label}</p>
+                        <p className="award-name">
+                          {entry.athleteName}
+                          {player?.age != null && <span className="player-age">{player.age}歳</span>}
+                        </p>
                       </div>
                     </div>
                   );
@@ -103,9 +111,18 @@ export default function AwardsPanel({ data }: { data: NBAData }) {
                     <div key={key} className="award-team-row">
                       <span className="award-team-label">{icon} {label}</span>
                       <div className="award-team-members">
-                        {entries.map(e => (
-                          <span key={e.athleteId} className="award-member">{e.athleteName}</span>
-                        ))}
+                        {entries.map(e => {
+                          const player = playerById.get(e.athleteId);
+                          return (
+                            <span key={e.athleteId} className="award-member">
+                              {player?.headshot &&
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img className="award-member-photo" src={player.headshot} alt="" width={22} height={22} />}
+                              {e.athleteName}
+                              {player?.age != null && <span className="player-age">{player.age}歳</span>}
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
                   );
