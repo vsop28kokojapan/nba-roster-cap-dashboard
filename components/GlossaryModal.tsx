@@ -3,7 +3,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { GLOSSARY, GLOSSARY_CATEGORIES } from '@/lib/glossary';
 
-export default function GlossaryModal() {
+interface Props {
+  triggerClassName?: string;
+  triggerLabel?: string;
+}
+
+export default function GlossaryModal({ triggerClassName = 'glossary-modal-trigger', triggerLabel = '📖 用語集' }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
@@ -33,8 +38,8 @@ export default function GlossaryModal() {
 
   return (
     <>
-      <button type="button" className="glossary-modal-trigger" onClick={() => setOpen(true)}>
-        📖 用語集
+      <button type="button" className={triggerClassName} onClick={() => setOpen(true)}>
+        {triggerLabel}
       </button>
 
       {open && (

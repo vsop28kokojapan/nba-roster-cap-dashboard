@@ -15,6 +15,7 @@ import AwardsPanel from './AwardsPanel';
 import Scoreboard from './Scoreboard';
 import StandingsHero from './StandingsHero';
 import TournamentSection from './TournamentSection';
+import GlossaryModal from './GlossaryModal';
 
 type Tab = 'teams' | 'players' | 'trades' | 'history' | 'awards';
 
@@ -341,7 +342,12 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
           </p>
         </div>
         <div className="header-actions">
-          <Link className="glossary-link" href="/glossary">📖 用語集</Link>
+          <span className="glossary-header-desktop-only">
+            <GlossaryModal triggerClassName="glossary-link" />
+          </span>
+          <a className="glossary-link glossary-header-mobile-only" href="/glossary" target="_blank" rel="noopener noreferrer">
+            📖 用語集
+          </a>
           <button onClick={handleRefresh} disabled={refreshing} style={{ whiteSpace: 'nowrap' }}>
             {refreshing ? '更新中…' : '↻ データを更新'}
           </button>

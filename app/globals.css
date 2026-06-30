@@ -53,11 +53,17 @@ header button { background: var(--gold); color: var(--navy); padding: 9px 20px; 
   font-size: 13px;
   font-weight: 800;
   color: #cfe0f2;
+  background: transparent;
   border: 1px solid rgba(255,255,255,.25);
   border-radius: 6px;
   padding: 9px 16px;
 }
 .glossary-link:hover { color: var(--gold); border-color: var(--gold); }
+.glossary-header-mobile-only { display: none; }
+@media (max-width: 640px) {
+  .glossary-header-desktop-only { display: none; }
+  .glossary-header-mobile-only { display: inline-flex; }
+}
 header button:hover { background: var(--gold-dim); }
 a { text-decoration: none; color: inherit; }
 
