@@ -78,10 +78,11 @@ function CapChartSection({ teams, data, max }: { teams: Team[]; data: NBAData; m
         <span className="lg-second">第2</span>
       </div>
       <div className="cap-chart">
-        {sorted.map(t => {
+        {sorted.map((t, i) => {
           const total = t.totalCap ?? t.rosterSalary;
           return (
-            <Link key={t.abbreviation} className="cap-row" href={`/team/${t.abbreviation}`}>
+            <Link key={t.abbreviation} className="cap-row" href={`/team/${t.abbreviation}`} style={{ borderLeftColor: t.color }}>
+              <span className="cap-rank">{i + 1}</span>
               <div className="cap-team">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={t.logo} alt={t.abbreviation} width={25} height={25} />
@@ -108,7 +109,13 @@ function TeamGrid({ teams, data, max }: { teams: Team[]; data: NBAData; max: num
         const total = t.totalCap ?? t.rosterSalary;
         const phase = getTeamPhase(t.abbreviation, data);
         return (
-          <Link key={t.abbreviation} className="team-card" href={`/team/${t.abbreviation}`} aria-label={`${t.name}の詳細`}>
+          <Link
+            key={t.abbreviation}
+            className="team-card"
+            href={`/team/${t.abbreviation}`}
+            aria-label={`${t.name}の詳細`}
+            style={{ borderTopColor: t.color }}
+          >
             <div className="team-head">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={t.logo} alt={t.name} width={46} height={46} />
@@ -154,52 +161,58 @@ function buildAwardBadges(awards: NBAData['awards']): Map<string, { icon: string
   return map;
 }
 
-function PlayerTable({ players, awards }: { players: Player[]; awards: NBAData['awards'] }) {
+function PlayerList({ players, awards, teamMap }: { players: Player[]; awards: NBAData['awards']; teamMap: Map<string, Team> }) {
   const badges = buildAwardBadges(awards ?? []);
+  if (players.length === 0) return <p className="empty-note">該当する選手がいません。</p>;
   return (
-    <div className="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>チーム</th><th>背番号</th><th>選手</th><th>POS</th>
-            <th>サラリー</th><th>残年数</th><th>契約タイプ</th><th>在籍年数</th><th>トレード制限</th>
-          </tr>
-        </thead>
-        <tbody>
-          {players.map(p => (
-            <tr key={p.id}>
-              <td><b>{p.team}</b></td>
-              <td><b>{p.jersey}</b></td>
-              <td>
-                <div className="player">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {p.headshot && <img src={p.headshot} alt={p.name} width={32} height={32} />}
-                  {p.profile
-                    ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
-                    : p.name}
-                  {(badges.get(p.id) ?? []).map(b => (
-                    <span key={b.label + b.season} className="player-badge">
-                      <span className="pb-icon">{b.icon}</span>
-                      <span className="pb-label">{b.label}</span>
-                      <span className="pb-season">{b.season.slice(2)}</span>
-                    </span>
-                  ))}
-                </div>
-              </td>
-              <td>{p.position}</td>
-              <td><b>{yen(p.salary)}</b></td>
-              <td>{p.yearsRemaining ?? '—'}</td>
-              <td>
-                <ContractBadge type={p.contractType} />
-              </td>
-              <td>
-                <span className="tenure-label">{tenureLabel(p.yearsWithTeam)}</span>
-              </td>
-              <td>{p.tradeRestricted ? 'あり' : '—'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="player-list">
+      {players.map(p => {
+        const team = teamMap.get(p.team);
+        return (
+          <div key={p.id} className="player-row" style={{ borderLeftColor: team?.color ?? 'var(--navy)' }}>
+            <div className="pr-team">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {team?.logo && <img src={team.logo} alt="" width={24} height={24} />}
+              <span>{p.team}</span>
+            </div>
+            <span className="pr-jersey">#{p.jersey}</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {p.headshot
+              ? <img className="pr-photo" src={p.headshot} alt="" width={40} height={40} />
+              : <span className="pr-photo pr-photo-fallback">{p.name.slice(0, 1)}</span>
+            }
+            <div className="pr-info">
+              <div className="pr-name-row">
+                {p.profile
+                  ? <a href={p.profile} target="_blank" rel="noopener noreferrer">{p.name}</a>
+                  : <span>{p.name}</span>}
+                {(badges.get(p.id) ?? []).map(b => (
+                  <span key={b.label + b.season} className="player-badge">
+                    <span className="pb-icon">{b.icon}</span>
+                    <span className="pb-label">{b.label}</span>
+                    <span className="pb-season">{b.season.slice(2)}</span>
+                  </span>
+                ))}
+              </div>
+              <span className="pr-pos">{p.position}</span>
+            </div>
+            <div className="pr-stat">
+              <span className="pr-stat-label">サラリー</span>
+              <strong>{yen(p.salary)}</strong>
+            </div>
+            <div className="pr-stat pr-stat-narrow">
+              <span className="pr-stat-label">残年数</span>
+              <strong>{p.yearsRemaining ?? '—'}</strong>
+            </div>
+            <ContractBadge type={p.contractType} />
+            <div className="pr-stat pr-stat-narrow">
+              <span className="pr-stat-label">在籍</span>
+              <strong>{tenureLabel(p.yearsWithTeam)}</strong>
+            </div>
+            {p.tradeRestricted && <span className="pr-tr-flag">TR制限</span>}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -277,6 +290,7 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
   }
 
   const max = useMemo(() => capScale(data.teams, data.thresholds.secondApron), [data]);
+  const teamMap = useMemo(() => new Map(data.teams.map(t => [t.abbreviation, t])), [data.teams]);
   const q = search.trim().toLowerCase();
 
   const filteredTeams = useMemo(() => data.teams.filter(t =>
@@ -429,7 +443,7 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
         )}
         {tab === 'players' && (
           <section className="panel active">
-            <PlayerTable players={filteredPlayers} awards={data.awards ?? []} />
+            <PlayerList players={filteredPlayers} awards={data.awards ?? []} teamMap={teamMap} />
           </section>
         )}
         {tab === 'trades' && (

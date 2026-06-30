@@ -523,7 +523,7 @@ export default function TeamDetail({ team: t, players, data }: Props) {
 
   return (
     <section className="team-page">
-      <div className="detail-wrap">
+      <div className="detail-wrap" style={{ borderTopColor: t.color }}>
         <Link className="back-link" href="/">← 全チーム一覧へ戻る</Link>
 
         <div className="detail-head">

@@ -266,49 +266,50 @@ export default function HistoryPanel({ currentData }: Props) {
 
       {snapshot && !selectedTeam && (
         <div className="hist-all-teams">
-          <p className="eyebrow dark">{selectedSeason} · 全チームキャップ状況 <span className="hist-click-hint">（行をクリックで詳細）</span></p>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th onClick={() => toggleSort('name')} style={{cursor:'pointer'}}>チーム{sortMark('name')}</th>
-                  <th>監督</th>
-                  <th onClick={() => toggleSort('playerCount')} style={{cursor:'pointer'}}>選手数{sortMark('playerCount')}</th>
-                  <th onClick={() => toggleSort('totalCap')} style={{cursor:'pointer'}}>総額{sortMark('totalCap')}</th>
-                  <th onClick={() => toggleSort('rosterSalary')} style={{cursor:'pointer'}}>ロスター合計{sortMark('rosterSalary')}</th>
-                  <th onClick={() => toggleSort('deadCap')} style={{cursor:'pointer'}}>デッドキャップ{sortMark('deadCap')}</th>
-                  <th>ステータス</th><th>データソース</th>
-                </tr>
-              </thead>
-              <tbody>
-                {histTeams.map(t => (
-                  <tr
-                    key={t.abbreviation}
-                    className="hist-team-row"
-                    onClick={() => setModalTeam(t)}
-                  >
-                    <td>
-                      <div className="hist-team-cell">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        {t.logo && <img src={t.logo} alt={t.abbreviation} width={22} height={22} />}
-                        <span><b>{t.abbreviation}</b> {t.name}</span>
-                      </div>
-                    </td>
-                    <td style={{ fontSize: 12, color: '#4a5f70' }}>{t.coach ?? '—'}</td>
-                    <td>{t.playerCount}</td>
-                    <td><b>{million(t.totalCap ?? t.rosterSalary)}</b></td>
-                    <td>{million(t.rosterSalary)}</td>
-                    <td>{t.deadCap != null ? million(t.deadCap) : '—'}</td>
-                    <td>
-                      <span className={`badge ${badgeClass(t.apronStatus)}`} style={{ marginTop: 0 }}>
-                        {t.apronStatus}
-                      </span>
-                    </td>
-                    <td style={{ fontSize: 11, color: '#6e7f90' }}>{t.capSource}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="hist-all-teams-head">
+            <p className="eyebrow dark">{selectedSeason} · 全チームキャップ状況 <span className="hist-click-hint">（カードをクリックで詳細）</span></p>
+            <div className="hist-sort-chips">
+              {([
+                ['totalCap', '総額'],
+                ['rosterSalary', 'ロスター合計'],
+                ['deadCap', 'デッドキャップ'],
+                ['playerCount', '選手数'],
+                ['name', 'チーム名'],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  className={`hist-sort-chip${sort.key === key ? ' active' : ''}`}
+                  onClick={() => toggleSort(key)}
+                >
+                  {label}{sortMark(key)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="hist-team-list">
+            {histTeams.map((t, i) => (
+              <button
+                key={t.abbreviation}
+                className="hist-team-card"
+                style={{ borderLeftColor: t.color }}
+                onClick={() => setModalTeam(t)}
+              >
+                <span className="htc-rank">{i + 1}</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {t.logo && <img className="htc-logo" src={t.logo} alt="" width={32} height={32} />}
+                <div className="htc-info">
+                  <strong>{t.name}</strong>
+                  <span>{t.abbreviation}{t.coach ? ` · HC: ${t.coach}` : ''}</span>
+                </div>
+                <div className="htc-stat"><span>選手数</span><strong>{t.playerCount}</strong></div>
+                <div className="htc-stat"><span>総額</span><strong>{million(t.totalCap ?? t.rosterSalary)}</strong></div>
+                <div className="htc-stat"><span>ロスター</span><strong>{million(t.rosterSalary)}</strong></div>
+                <div className="htc-stat"><span>デッド</span><strong>{t.deadCap != null ? million(t.deadCap) : '—'}</strong></div>
+                <span className={`badge ${badgeClass(t.apronStatus)}`} style={{ marginTop: 0 }}>
+                  {t.apronStatus}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
       )}

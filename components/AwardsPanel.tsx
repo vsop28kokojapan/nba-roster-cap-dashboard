@@ -28,28 +28,18 @@ function StandingsTable({ east, west, season }: { east: StandingEntry[]; west: S
         {[{ label: 'イースト', entries: east }, { label: 'ウェスト', entries: west }].map(({ label, entries }) => (
           <div key={label} className="standings-conf">
             <h4>{label}</h4>
-            <table className="standings-table">
-              <thead>
-                <tr><th>#</th><th>チーム</th><th>W</th><th>L</th><th>勝率</th></tr>
-              </thead>
-              <tbody>
-                {entries.map(e => (
-                  <tr key={e.abbr} className={e.rank <= 6 ? 'playoff-in' : e.rank <= 10 ? 'playin' : ''}>
-                    <td className="rank">{e.rank}</td>
-                    <td>
-                      <div className="standings-team">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        {e.logo && <img src={e.logo} alt={e.abbr} width={20} height={20} />}
-                        <span><b>{e.abbr}</b> <span className="standings-name">{e.name}</span></span>
-                      </div>
-                    </td>
-                    <td><b>{e.wins}</b></td>
-                    <td>{e.losses}</td>
-                    <td>{e.wins + e.losses > 0 ? (e.wins / (e.wins + e.losses)).toFixed(3).replace(/^0/, '') : '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="standings-list">
+              {entries.map(e => (
+                <div key={e.abbr} className={`standings-row${e.rank <= 6 ? ' playoff-in' : e.rank <= 10 ? ' playin' : ''}`}>
+                  <span className="sr-rank">{e.rank}</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {e.logo && <img className="sr-logo" src={e.logo} alt="" width={26} height={26} />}
+                  <span className="sr-name"><b>{e.abbr}</b> <span className="standings-name">{e.name}</span></span>
+                  <span className="sr-record"><b>{e.wins}</b>-{e.losses}</span>
+                  <span className="sr-pct">{e.wins + e.losses > 0 ? (e.wins / (e.wins + e.losses)).toFixed(3).replace(/^0/, '') : '—'}</span>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
