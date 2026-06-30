@@ -604,6 +604,27 @@ export default function TeamDetail({ team: t, players, data }: Props) {
           </div>
           <div className="table-wrap">
             <table className="sortable-table">
+              <colgroup>
+                <col style={{ width: '5%' }} />
+                <col style={{ width: '25%' }} />
+                <col style={{ width: '5%' }} />
+                {multiYear ? (
+                  contractYearCols.map(yr => (
+                    <col key={yr} style={{ width: `${32 / contractYearCols.length}%` }} />
+                  ))
+                ) : (
+                  <>
+                    <col style={{ width: '14%' }} />
+                    <col style={{ width: '7%' }} />
+                    <col style={{ width: '11%' }} />
+                  </>
+                )}
+                <col style={{ width: '6%' }} />
+                <col style={{ width: '6%' }} />
+                <col style={{ width: '6%' }} />
+                <col style={{ width: '6%' }} />
+                <col style={{ width: '6%' }} />
+              </colgroup>
               <thead>
                 <tr>
                   {BASE_COLUMNS.map(([key, label]) => (

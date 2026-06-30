@@ -444,19 +444,19 @@ export async function fetchNbaData(): Promise<NBAData> {
     const payload = await get(`${ESPN}/teams/${abbr}/roster`);
     rosterPayloads.set(team.abbreviation as string, payload);
     return flattenAthletes(payload.athletes).map(a => {
-      // ESPN roster API returns `contracts` (array), not singular `contract`
+      // ESPN roster APIは選手ごとに「現在の契約」を表す単数 `contract` と、
+      // 過去〜将来の年俸履歴を表す配列 `contracts` の両方を返す。
+      // yearsRemaining・tradeRestricted等はESPN自身の計算値である `contract` 側を優先する
+      // （配列から再計算すると将来年度が未掲載のケースで過少カウントされるバグがあった）。
+      const contract = a.contract as Record<string, unknown> | undefined;
+      const salary = (contract?.salary as number | null) ?? null;
+      const espnType = contract?.contractType ?? contract?.type ?? null;
+      // 複数年表示用：契約全体の年俸履歴（今シーズン以降・salary>0のみ）
       const contractsArr = (a.contracts as Array<{ salary: number; season: { year: number } }>) ?? [];
-      const sortedContracts = [...contractsArr].sort((x, y) => x.season.year - y.season.year);
-      // Current season contract = the entry matching espnYear; fallback to latest
-      const currentEntry = sortedContracts.find(c => c.season?.year === espnYear)
-        ?? sortedContracts.filter(c => c.salary > 0).at(-1);
-      const salary = currentEntry?.salary ?? null;
-      // Future years (current season onward, salary > 0)
-      const contractYears = sortedContracts
+      const contractYears = [...contractsArr]
+        .sort((x, y) => x.season.year - y.season.year)
         .filter(c => c.season?.year >= espnYear && c.salary > 0)
         .map(c => ({ year: c.season.year, salary: c.salary }));
-      const yearsRemaining = Math.max(0, contractYears.length - 1);
-      const espnType = null; // not available in contracts array format
       return {
         id: a.id as string,
         team: team.abbreviation as string,
@@ -468,10 +468,10 @@ export async function fetchNbaData(): Promise<NBAData> {
         height: (a.displayHeight as string) || '',
         weight: (a.displayWeight as string) || '',
         salary,
-        incomingTradeValue: null,
-        outgoingTradeValue: null,
-        yearsRemaining,
-        tradeRestricted: false,
+        incomingTradeValue: (contract?.incomingTradeValue as number | null) ?? null,
+        outgoingTradeValue: (contract?.outgoingTradeValue as number | null) ?? null,
+        yearsRemaining: (contract?.yearsRemaining as number | null) ?? null,
+        tradeRestricted: Boolean(contract?.tradeRestriction),
         headshot: ((a.headshot as Record<string, string> | undefined)?.href) || '',
         profile:
           ((a.links as Array<{ rel?: string[]; href: string }> | undefined)

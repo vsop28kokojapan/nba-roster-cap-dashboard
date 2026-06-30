@@ -814,6 +814,7 @@ thead tr th:last-child { border-top-right-radius: 11px; }
 }
 
 /* ── sortable table ── */
+.sortable-table { table-layout: fixed; min-width: 0; }
 .sortable-table th { padding: 0; }
 .sortable-table th button {
   width: 100%; height: 100%;
@@ -872,9 +873,10 @@ thead tr th:last-child { border-top-right-radius: 11px; }
 .col-tip:hover::after { opacity: 1; transform: translateX(-50%) translateY(4px); }
 .col-tip:hover::before { opacity: 1; }
 th.stats-col .col-tip { border-bottom-color: #b9c8d6; }
-.sortable-table th:last-child .col-tip::after { left: auto; right: 0; transform: translateY(8px); }
-.sortable-table th:last-child .col-tip:hover::after { transform: translateY(4px); }
-.sortable-table th:last-child .col-tip::before { left: auto; right: 12px; transform: translateY(2px); }
+/* スティッキーヘッダーが画面右端に近い数値カラムは中央寄せだと表の外へはみ出すため右寄せに固定 */
+.sortable-table th.stats-col .col-tip::after { left: auto; right: 0; transform: translateY(8px); max-width: 180px; }
+.sortable-table th.stats-col .col-tip:hover::after { transform: translateY(4px); }
+.sortable-table th.stats-col .col-tip::before { left: auto; right: 12px; transform: translateY(2px); }
 
 /* ── responsive ── */
 @media (max-width: 950px) {
