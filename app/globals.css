@@ -1690,10 +1690,12 @@ th.yr-col { font-size: 10px; color: #8a9daf; text-transform: uppercase; letter-s
 .ts-team-chip img { border-radius: 50%; background: #fff; }
 
 .ts-rosters {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 14px; margin-bottom: 18px;
+  display: flex; gap: 14px; margin-bottom: 18px;
+  overflow-x: auto; padding-bottom: 6px;
+  scroll-snap-type: x proximity;
 }
 .ts-roster-col {
+  flex: 0 0 270px; scroll-snap-align: start;
   background: #fff; border: 1px solid var(--line); border-top: 4px solid var(--navy);
   border-radius: 12px; padding: 14px; box-shadow: 0 2px 10px rgba(10,25,49,.05);
 }
