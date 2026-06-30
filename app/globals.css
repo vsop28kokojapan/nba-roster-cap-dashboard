@@ -1668,3 +1668,79 @@ th.yr-col { font-size: 10px; color: #8a9daf; text-transform: uppercase; letter-s
   margin: 12px 0 0; padding-top: 10px;
   border-top: 1px solid #edf2f7;
 }
+
+/* ── trade simulator ── */
+.trade-sim { padding: 4px 0 32px; }
+.trade-sim h3 { margin: 0 0 4px; font-size: 19px; color: var(--navy); }
+.ts-sub { margin: 0 0 16px; font-size: 12.5px; color: #5a6d80; }
+
+.ts-team-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.ts-team-chip {
+  background: #fff; border: 1px solid var(--line); border-radius: 999px;
+  font-size: 12px; font-weight: 800; color: #44566a; padding: 6px 14px;
+}
+.ts-team-chip:hover { border-color: var(--gold); }
+.ts-team-chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+.ts-rosters {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px; margin-bottom: 18px;
+}
+.ts-roster-col { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.ts-roster-col h4 { margin: 0 0 10px; font-size: 14px; color: var(--navy); }
+.ts-asset-group { display: flex; flex-direction: column; gap: 2px; max-height: 320px; overflow-y: auto; }
+.ts-asset-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 6px; border-radius: 6px; font-size: 12.5px; cursor: pointer;
+}
+.ts-asset-row:hover { background: #f3f6fa; }
+.ts-asset-row.checked { background: var(--gold-pale); }
+.ts-asset-row input { margin: 0; }
+.ts-asset-label { flex: 1; color: #2a3a4d; }
+.ts-asset-salary { color: #718096; font-variant-numeric: tabular-nums; font-size: 11.5px; }
+.ts-pick-row .ts-asset-label { color: #5a6d80; font-style: italic; }
+.ts-empty { font-size: 12px; color: #a0aec0; padding: 6px 0; }
+
+.ts-board { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 18px; overflow-x: auto; }
+.ts-board h4 { margin: 0 0 12px; font-size: 14px; color: var(--navy); }
+.ts-board-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.ts-board-table th { text-align: left; color: #8097aa; font-weight: 700; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.ts-board-table td { padding: 7px 8px; border-bottom: 1px solid #f0f3f7; color: #2a3a4d; }
+.ts-board-table select { font-size: 12px; padding: 4px 8px; }
+.ts-warning { margin: 10px 0 0; font-size: 12px; color: #7d5700; }
+
+.ts-results { margin-bottom: 16px; }
+.ts-results-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.ts-results-head h4 { margin: 0; font-size: 14px; color: var(--navy); }
+.ts-overall { font-size: 12.5px; font-weight: 900; padding: 4px 12px; border-radius: 999px; }
+.ts-overall-ok { background: #dff5ed; color: #08715a; }
+.ts-overall-ng { background: #ffe2e4; color: #ad1421; }
+
+.ts-result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.ts-result-card { border-radius: 12px; padding: 14px; border: 1px solid var(--line); background: #fff; }
+.ts-result-card.ts-ok { border-color: #b7e6d4; }
+.ts-result-card.ts-ng { border-color: #f3b9c0; background: #fff8f8; }
+.ts-result-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.ts-result-head strong { font-size: 13.5px; color: var(--navy); }
+
+.ts-result-stats { display: grid; gap: 6px; margin: 0 0 10px; }
+.ts-result-stats > div { display: flex; justify-content: space-between; font-size: 12px; }
+.ts-result-stats dt { color: #8097aa; }
+.ts-result-stats dd { margin: 0; font-weight: 700; color: #2a3a4d; }
+
+.ts-result-post {
+  display: flex; align-items: center; gap: 8px; font-size: 12px; color: #718096;
+  padding-top: 10px; border-top: 1px dashed var(--line);
+}
+.ts-result-post strong { color: var(--navy); font-size: 13px; }
+
+.ts-reasons { margin: 10px 0 0; padding-left: 18px; font-size: 11.5px; color: #ad1421; }
+.ts-reasons li { margin-bottom: 4px; }
+
+.ts-reset {
+  background: #f3f6fa; color: #44566a; font-size: 12.5px; font-weight: 800;
+  border-radius: 8px; padding: 9px 18px;
+}
+.ts-reset:hover { background: #e7eef7; }
+
+.ts-disclaimer { margin: 18px 0 0; font-size: 11px; color: #a0aec0; line-height: 1.7; }

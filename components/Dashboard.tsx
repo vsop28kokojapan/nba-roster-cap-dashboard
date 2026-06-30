@@ -16,8 +16,9 @@ import Scoreboard from './Scoreboard';
 import StandingsHero from './StandingsHero';
 import TournamentSection from './TournamentSection';
 import GlossaryModal from './GlossaryModal';
+import TradeSimulator from './TradeSimulator';
 
-type Tab = 'teams' | 'players' | 'trades' | 'history' | 'awards';
+type Tab = 'teams' | 'players' | 'trades' | 'history' | 'awards' | 'simulator';
 
 const SB_URL = 'https://wbojovciyyhkxewjfllz.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indib2pvdmNpeXloa3hld2pmbGx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMDc0NzQsImV4cCI6MjA5Nzc4MzQ3NH0.kfjq4Ww3NKppkbU9GQcKXPAPO2FNnz_BkZseiGhKHDc';
@@ -329,7 +330,7 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
     URL.revokeObjectURL(a.href);
   }
 
-  const showToolbar = tab !== 'history' && tab !== 'awards';
+  const showToolbar = tab !== 'history' && tab !== 'awards' && tab !== 'simulator';
 
   return (
     <>
@@ -370,12 +371,13 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
         <RuleGuide thresholds={data.thresholds} />
 
         <nav className="tabs">
-          {(['teams', 'players', 'awards', 'history', 'trades'] as Tab[]).map(t => (
+          {(['teams', 'players', 'awards', 'history', 'trades', 'simulator'] as Tab[]).map(t => (
             <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
               {t === 'teams' ? 'チーム一覧'
                 : t === 'players' ? '選手'
                 : t === 'awards' ? '🏆 アワード'
                 : t === 'history' ? '📊 履歴'
+                : t === 'simulator' ? '🔀 トレードシミュレーター'
                 : 'トレード・異動'}
             </button>
           ))}
@@ -446,6 +448,11 @@ export default function Dashboard({ initialData }: { initialData: NBAData | null
               ? <AwardsPanel data={data} />
               : <p style={{ color: '#8097aa', padding: '40px 0' }}>アワードデータがまだ取得されていません。「↻ データを更新」を実行してください。</p>
             }
+          </section>
+        )}
+        {tab === 'simulator' && (
+          <section className="panel active">
+            <TradeSimulator data={data} />
           </section>
         )}
 
