@@ -171,7 +171,7 @@ export function getTeamExceptions(team: { totalCap: number | null; rosterSalary:
     exceptions.push({
       key: 'none',
       label: 'MLE / BAE',
-      glossaryTerm: null,
+      glossaryTerm: 'MLE / BAE',
       amount: null,
       available: false,
       note: '第2エプロンを超過しているため、ミッドレベル例外・隔年例外は一切使用不可。',
